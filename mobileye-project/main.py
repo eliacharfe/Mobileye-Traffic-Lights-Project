@@ -3,14 +3,12 @@ try:
     import json
     import glob
     import argparse
-
     import numpy as np
     from scipy import signal as sg
     from scipy.ndimage.filters import maximum_filter
-
     from PIL import Image
-
     import matplotlib.pyplot as plt
+    import cv2
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -43,30 +41,32 @@ def show_image_and_gt(image, objs, fig_num=None):
 
 
 def test_find_tfl_lights(image_path, json_path=None, fig_num=None):
-    """
-    Run the attention code
-    """
-    image = np.array(Image.open(image_path))
-    if json_path is None:
-        objects = None
-    else:
-        gt_data = json.load(open(json_path))
-        what = ['traffic light']
-        objects = [o for o in gt_data['objects'] if o['label'] in what]
-
+    """ Run the attention code """
+    image = np.array(make_image_grayscale(image_path))
+    # if json_path is None:
+    #     objects = None
+    # else:
+    #     gt_data = json.load(open(json_path))
+    #     what = ['traffic light']
+    #     objects = [o for o in gt_data['objects'] if o['label'] in what]
     # show_image_and_gt(image, objects, fig_num)
     plt.figure(56)
     plt.clf()
     h = plt.subplot(111)
-    plt.imshow(image)
+    plt.imshow(image, cmap='gray')
     plt.figure(57)
     plt.clf()
     plt.subplot(111, sharex=h, sharey=h)
-    plt.imshow(image)
+    plt.imshow(image, cmap='gray')
 
     red_x, red_y, green_x, green_y = find_tfl_lights(image)
     plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
+
+def make_image_grayscale(image_path):
+    im = plt.imread(image_path)
+    img = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    return img
 
 
 def main(argv=None):
