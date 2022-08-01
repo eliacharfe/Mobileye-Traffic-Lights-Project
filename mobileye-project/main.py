@@ -5,7 +5,7 @@ try:
     import argparse
     import numpy as np
     from scipy import signal as sg
-    from scipy.ndimage.filters import maximum_filter
+    from scipy.ndimage import maximum_filter
     from PIL import Image
     import matplotlib.pyplot as plt
     import cv2
@@ -44,10 +44,6 @@ except ImportError:
 
 # BLACK = -0.64
 # WHITE = 0.36
-
-BLACK = -0.54
-WHITE = 0.26666666667
-
 # kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
 #                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
 #                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
@@ -59,6 +55,27 @@ WHITE = 0.26666666667
 #                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
 #                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
+
+# BLACK = -0.4
+# GRAY = -0.1
+# WHITE = 0.39183
+#
+# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+#                    [BLACK, GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY,  GRAY, GRAY,   GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
+#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]
+#                    ])
+#
+
+BLACK = -0.54
+WHITE = 0.26666666667
 kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
@@ -104,11 +121,10 @@ def show_image_and_gt(image, objs, fig_num=None):
 
 def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
-    image = np.array(make_image_grayscale(image_path))
-
-    # image *= 255
-    # image = image.astype(np.unit8)
-    plot_image(image)
+    # image = np.array(make_image_grayscale(image_path))
+    image = np.array(Image.open(image_path))
+    # blue, green, red = cv2.split(image)
+    show_image(image)
 
     # image = resize_images(image, (256, 256))
     # image = np.array(Image.open(image_path))
@@ -119,94 +135,57 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     #     what = ['traffic light']
     #     objects = [o for o in gt_data['objects'] if o['label'] in what]
     # show_image_and_gt(image, objects, fig_num)
-    #
-    # tophat = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
-    # ret, thresh = cv2.threshold(tophat, threshold, 255, cv2.THRESH_BINARY)
-    #
-    # dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-    # ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
-    # watershed = cv2.watershed(image, markers)
-    #
-    # plt.imshow(watershed)
-
-    # th, im_th = cv2.threshold(image, 220, 255, cv2.THRESH_BINARY_INV);
-    # im_floodfill = im_th.copy()
-    # h, w = im_th.shape[:2]
-    # mask = np.zeros((h + 2, w + 2), np.uint8)
-    # cv2.floodFill(im_floodfill, mask, (0, 0), 255);
-    # im_floodfill_inv = cv2.bitwise_not(im_floodfill)
-    # im_out = im_floodfill_inv # im_th |
-    # cv2.imshow("Thresholded Image", im_th)
-    # cv2.imshow("Floodfilled Image", im_floodfill)
-    # cv2.imshow("Inverted Floodfilled Image", im_floodfill_inv)
-    # cv2.imshow("Foreground", im_out)
-    # cv2.waitKey(0)
-
-    # plt.figure()
-    # plt.clf()
-    # h = plt.subplot(111)
-    # plt.imshow(im_th)
-
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_floodfill)
-    #
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_floodfill_inv)
-    #
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_out)
-
-
     red_x, red_y, green_x, green_y = find_tfl_lights(image)
     plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
 
-def plot_image(image):
-    # print(image.shape)
-    # print(kernel.shape)
+def plot_image():
+    plt.figure()
+    plt.clf()
+
+
+def show_image(image):
+    print(image.shape)
+    print(kernel.shape)
     print("kernel sum: " + str(kernel.sum()))
-    plt.figure()
-    plt.clf()
+
+    plot_image()
     h = plt.subplot(111)
-    plt.imshow(image, cmap='gray')
-    plt.figure()
-    plt.clf()
+    plt.imshow(image)
+
+    convolve_red(image, h)
+    convolve_green(image, h)
+
+    plt.show(block=True)
+    # conv = sg.convolve2d(image, kernel)
+
+
+def convolve_red(image, h):
+    red_filtered_image = Image.fromarray(image[:, :, 0])
+    plot_image()
     plt.subplot(111, sharex=h, sharey=h)
-
-    conv = sg.convolve2d(image, kernel)
-    plt.imshow(conv > 2.5, cmap='gray')
-    # plt.gray()
-
-    # coordinates = peak_local_max(image, min_distance=10)
-    # plt.plot(coordinates[:, 1], coordinates[:, 0], 'ro', color='r', markersize=4)
-    # plt.imshow(image, cmap='gray')
-
-    # filter_arr = [[]]
-    #
-    # # go through each element in arr
-    # for o in conv:
-    #     temp = []
-    #     for elem in o:
-    #     # if the element is higher than 42, set the value to True, otherwise False:
-    #         if elem > 3:
-    #             temp.append(True)
-    #         else:
-    #             temp.append(False)
-    #     filter_arr.append(temp)
-    # newarr = conv[filter_arr]
-    #
-    # coordinates = peak_local_max(newarr, min_distance=10)
-    # plt.plot(coordinates[:, 1], coordinates[:, 0], 'ro', color='r', markersize=4)
-    # plt.imshow(image, cmap='gray')
+    red_conv = sg.convolve(red_filtered_image, kernel)
+    plt.imshow(red_conv, cmap='gray')
+    # plt.imshow(red_conv) # ??
+    red_image_conv = Image.fromarray(red_conv)
+    plot_image()
+    plt.subplot(111, sharex=h, sharey=h)
+    plt.imshow(red_image_conv)
 
 
+def convolve_green(image, h):
+    green_filtered_image = Image.fromarray(image[:, :, 1])
+    plot_image()
+    plt.subplot(111, sharex=h, sharey=h)
+    plt.imshow(green_filtered_image)
+    green_conv = sg.convolve(green_filtered_image, kernel)
+    plt.imshow(green_conv, cmap='gray')
+
+    green_image_conv = Image.fromarray(green_conv)
+    plot_image()
+    plt.subplot(111, sharex=h, sharey=h)
+    plt.imshow(green_image_conv)
 
 
 def make_image_grayscale(image_path):
@@ -219,14 +198,11 @@ def resize_images(image, new_size):
     return cv2.resize(image, new_size)
 
 
-
-
 def main(argv=None):
     """It's nice to have a standalone tester for the algorithm.
     Consider looping over some images from here, so you can manually exmine the results
     Keep this functionality even after you have all system running, because you sometime want to debug/improve a module
     :param argv: In case you want to programmatically run this"""
-
     parser = argparse.ArgumentParser("Test TFL attention mechanism")
     parser.add_argument('-i', '--image', type=str, help='Path to an image')
     parser.add_argument("-j", "--json", type=str, help="Path to json GT for comparison")
