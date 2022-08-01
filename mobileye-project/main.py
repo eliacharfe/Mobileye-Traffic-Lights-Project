@@ -42,17 +42,35 @@ except ImportError:
 #                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
 #                    [0.64, 0.64, 0.64, 0.64, 0.64]])
 
-kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64,-0.64, -0.64, -0.64, -0.64, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36,-0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
-                   [-0.64, -0.64, -0.64, -0.64, -0.64,-0.64, -0.64, -0.64, -0.64, -0.64]])
+# BLACK = -0.64
+# WHITE = 0.36
 
+BLACK = -0.54
+WHITE = 0.26666666667
+
+# kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
+
+kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+                   [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
+                   ])
 
 threshold = 100
 
