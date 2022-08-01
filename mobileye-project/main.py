@@ -4,12 +4,14 @@ try:
     import glob
     import argparse
     import numpy as np
+    import tk
     from scipy import signal as sg
     from scipy.ndimage.filters import maximum_filter
     from PIL import Image
     import matplotlib.pyplot as plt
     import cv2
     from skimage.feature import peak_local_max
+
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -47,6 +49,8 @@ except ImportError:
 
 BLACK = -0.54
 WHITE = 0.26666666667
+
+CROPPED_PERCENT = 0.55
 
 # kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
 #                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
@@ -104,11 +108,16 @@ def show_image_and_gt(image, objs, fig_num=None):
 
 def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
-    image = np.array(make_image_grayscale(image_path))
+    original_image = np.array(plt.imread(image_path)) #in case we will need a colored picture.
+
+    cropped_image = original_image[0:int(original_image.shape[0]*CROPPED_PERCENT), 0:original_image.shape[1]]
+
+    gray_image = np.array(make_image_grayscale(image_path))
+    gray_cropped_image = gray_image[0:int(gray_image.shape[0]*CROPPED_PERCENT), 0:gray_image.shape[1]]
 
     # image *= 255
     # image = image.astype(np.unit8)
-    plot_image(image)
+    plot_image(gray_cropped_image)
 
     # image = resize_images(image, (256, 256))
     # image = np.array(Image.open(image_path))
@@ -163,7 +172,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     # plt.imshow(im_out)
 
 
-    red_x, red_y, green_x, green_y = find_tfl_lights(image)
+    red_x, red_y, green_x, green_y = find_tfl_lights(gray_cropped_image)
     plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
@@ -172,16 +181,19 @@ def plot_image(image):
     # print(image.shape)
     # print(kernel.shape)
     print("kernel sum: " + str(kernel.sum()))
-    plt.figure()
-    plt.clf()
-    h = plt.subplot(111)
+    # plt.figure()
+    # plt.clf()
+    h = plt.subplot(1, 2, 1)
     plt.imshow(image, cmap='gray')
-    plt.figure()
-    plt.clf()
-    plt.subplot(111, sharex=h, sharey=h)
-
+    plt.title("gray image:")
+    # plt.figure()
+    # plt.clf()
+    plt.subplot(1, 2, 2, sharex=h, sharey=h)
     conv = sg.convolve2d(image, kernel)
     plt.imshow(conv > 2.5, cmap='gray')
+    plt.title("image after convolution:")
+    plt.show()
+
     # plt.gray()
 
     # coordinates = peak_local_max(image, min_distance=10)
@@ -240,7 +252,6 @@ def main(argv=None):
 
     for image in flist:
         json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
-
         if not os.path.exists(json_fn):
             json_fn = None
         test_find_tfl_lights(image, json_fn)
