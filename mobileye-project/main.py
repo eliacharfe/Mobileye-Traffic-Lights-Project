@@ -14,6 +14,45 @@ except ImportError:
     raise
 
 
+# kernel = np.array([[-0.04, -0.04, -0.04, -0.04, -0.04],
+#                    [-0.04, 0.04,  0.04, 0.04, -0.04],
+#                    [-0.04,  0.04,  0.04, 0.04, -0.04],
+#                    [-0.04,  0.04,  0.04,  0.04, -0.04],
+#                    [-0.04, -0.04, -0.04, -0.04, -0.04]])
+#
+#
+# kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64],
+#                    [-0.64, 1.1377777777,  1.1377777777, 1.1377777777, -0.64],
+#                    [-0.64,  1.1377777777,  1.1377777777, 1.1377777777, -0.64],
+#                    [-0.64,  1.1377777777,  1.1377777777,  1.1377777777, -0.64],
+#                    [-0.64, -0.64, -0.64, -0.64, -0.64]])
+
+#
+# kernel = np.array([[0.04, 0.04, 0.04, 0.04, 0.04],
+#                    [0.04, -0.04,  -0.04, -0.04, 0.04],
+#                    [0.04,  -0.04,  -0.04, -0.04, 0.04],
+#                    [0.04,  -0.04,  -0.04,  -0.04,  0.04],
+#                    [0.04, 0.04, 0.04, 0.04, 0.04]])
+#
+#
+# kernel = np.array([[0.64, 0.64, 0.64, 0.64, 0.64],
+#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
+#                    [0.64,  -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
+#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
+#                    [0.64, 0.64, 0.64, 0.64, 0.64]])
+
+kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64,-0.64, -0.64, -0.64, -0.64, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36,-0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, 0.36, 0.36,  0.36, 0.36, 0.36, 0.36, 0.36, 0.36, -0.64],
+                   [-0.64, -0.64, -0.64, -0.64, -0.64,-0.64, -0.64, -0.64, -0.64, -0.64]])
+
+
 def find_tfl_lights(c_image: np.ndarray, **kwargs):
     """
     Detect candidates for TFL lights. Use c_image, kwargs and you imagination to implement
@@ -23,6 +62,7 @@ def find_tfl_lights(c_image: np.ndarray, **kwargs):
     """
     ### WRITE YOUR CODE HERE ###
     ### USE HELPER FUNCTIONS ###
+
     return [500, 510, 520], [500, 500, 500], [700, 710], [500, 500]
 
 
@@ -40,9 +80,12 @@ def show_image_and_gt(image, objs, fig_num=None):
             plt.legend()
 
 
-def test_find_tfl_lights(image_path, json_path=None, fig_num=None):
+def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
     image = np.array(make_image_grayscale(image_path))
+
+    # image = resize_images(image, (256, 256))
+    # image = np.array(Image.open(image_path))
     # if json_path is None:
     #     objects = None
     # else:
@@ -50,23 +93,36 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=None):
     #     what = ['traffic light']
     #     objects = [o for o in gt_data['objects'] if o['label'] in what]
     # show_image_and_gt(image, objects, fig_num)
-    plt.figure(56)
+
+    plt.figure()
     plt.clf()
     h = plt.subplot(111)
     plt.imshow(image, cmap='gray')
-    plt.figure(57)
+
+    plt.figure()
     plt.clf()
     plt.subplot(111, sharex=h, sharey=h)
-    plt.imshow(image, cmap='gray')
+    # plt.imshow(image, cmap='gray')
+
+    print(image.shape)
+    print(kernel.shape)
+    print("kernel sum: " + str(kernel.sum()))
+
+    plt.imshow(sg.convolve2d(image, kernel), cmap='gray')
 
     red_x, red_y, green_x, green_y = find_tfl_lights(image)
     plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
+
 def make_image_grayscale(image_path):
     im = plt.imread(image_path)
     img = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
     return img
+
+
+def resize_images(image, new_size):
+    return cv2.resize(image, new_size)
 
 
 def main(argv=None):
@@ -109,3 +165,13 @@ if __name__ == '__main__':
 # img = Image.open('image.png').convert('L')
 # img.save('greyscale.png')
 
+# threshold = 100
+#
+# gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+# kernel = np.ones((9, 9), np.uint8)
+# tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)
+# ret, thresh = cv2.threshold(tophat, threshold, 255, cv2.THRESH_BINARY)
+#
+# dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
+# ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
+# watershed = cv2.watershed(im, markers)
