@@ -14,7 +14,6 @@ except ImportError:
     print("Need to fix the installation")
     raise
 
-
 # kernel = np.array([[-0.04, -0.04, -0.04, -0.04, -0.04],
 #                    [-0.04, 0.04,  0.04, 0.04, -0.04],
 #                    [-0.04,  0.04,  0.04, 0.04, -0.04],
@@ -55,55 +54,19 @@ kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLAC
                    [BLACK, BLACK, BLACK,  WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK],
                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
-
-# BLACK = -0.4
-# GRAY = -0.1
-# WHITE = 0.39183
-#
-# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY,  GRAY, GRAY,   GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]
-#                    ])
-#
-
-# BLACK = -0.54
-# WHITE = 0.26666666667
-# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-#                    [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
-#                    ])
-
-threshold = 100
 CROPPED_PERCENT = 0.6
 
 
 def convolve_red(image, h):
-    # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filtered_image = image[:, :, 0]
     plt.subplot(2, 2, 2, sharex=h, sharey=h)
     red_conv = sg.convolve2d(red_filtered_image, kernel)
-    plt.imshow(red_conv)
-    #plt.imshow(red_conv > 6)
+    # plt.imshow(red_conv)
+    plt.imshow(red_conv > 5.1)
     plt.title("Convolved red")
 
-    relevant_list = np.where(red_conv > 5.10, red_conv, 0)
-    coordinates = peak_local_max(relevant_list, min_distance=35)
+    relevant_list = np.where(red_conv > 5.1, red_conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=32)
     coordinates -= 5
     return coordinates
 
@@ -112,23 +75,14 @@ def convolve_green(image, h):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
     green_conv = sg.convolve2d(green_filtered_image, kernel)
-    plt.imshow(green_conv)
-    #plt.imshow(green_conv > 6)
+    # plt.imshow(green_conv)
+    plt.imshow(green_conv >= 4.5)
     plt.title("Convolved green")
 
     relevant_list = np.where(green_conv >= 4.5, green_conv, 0)
-    coordinates = peak_local_max(relevant_list, min_distance=35)
+    coordinates = peak_local_max(relevant_list, min_distance=32)
     coordinates -= 5
     return coordinates
-
-
-# def find_specific_color(image, color: int):
-#     img_color = image[:, :, color]
-#     conv = sg.convolve2d(img_color, kernel)
-#     relevant_list = np.where(conv > 5, conv, 0)
-#     coordinates = peak_local_max(relevant_list, min_distance=15)
-#     coordinates -= 5
-#     return coordinates
 
 
 def find_tfl_lights(image: np.ndarray, *args):
@@ -167,7 +121,8 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
         plt.imshow(cropped_image)
         plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
         plt.plot(red_x, red_y, 'ro', color='r', markersize=3)
-        plt.title(f"black = {BLACK}, white = {WHITE}")
+        # plt.title(f"black = {BLACK}, white = {WHITE}")
+        plt.title("Suspected max points for TL")
         plt.show()
 
 
