@@ -90,64 +90,7 @@ kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
 #                    ])
 
 threshold = 100
-
-
-def find_tfl_lights(c_image: np.ndarray, **kwargs):
-    """
-    Detect candidates for TFL lights. Use c_image, kwargs and you imagination to implement
-    :param c_image: The image itself as np.uint8, shape of (H, W, 3)
-    :param kwargs: Whatever config you want to pass in here
-    :return: 4-tuple of x_red, y_red, x_green, y_green
-    """
-    ### WRITE YOUR CODE HERE ###
-    ### USE HELPER FUNCTIONS ###
-
-    return [500, 510, 520], [500, 500, 500], [700, 710], [500, 500]
-
-
-### GIVEN CODE TO TEST YOUR IMPLENTATION AND PLOT THE PICTURES
-def show_image_and_gt(image, objs, fig_num=None):
-    plt.figure(fig_num).clf()
-    plt.imshow(image)
-    labels = set()
-    if objs is not None:
-        for o in objs:
-            poly = np.array(o['polygon'])[list(np.arange(len(o['polygon']))) + [0]]
-            plt.plot(poly[:, 0], poly[:, 1], 'r', label=o['label'])
-            labels.add(o['label'])
-        if len(labels) > 1:
-            plt.legend()
-
-
-def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
-    """ Run the attention code """
-    image = np.array(plt.imread(image_path))
-    cropped_image = image[: int(image.shape[0] * 0.6), :]
-    show_image(cropped_image)
-    # if json_path is None:
-    #     objects = None
-    # else:
-    #     gt_data = json.load(open(json_path))
-    #     what = ['traffic light']
-    #     objects = [o for o in gt_data['objects'] if o['label'] in what]
-    # show_image_and_gt(image, objects, fig_num)
-    red_x, red_y, green_x, green_y = find_tfl_lights(image)
-    plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
-    plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
-
-
-def show_image(image):
-    # print(image.shape)
-    # print(kernel.shape)
-    # print("kernel sum: " + str(kernel.sum()))
-
-    h = plt.subplot(2, 2, 1)
-    plt.imshow(image)
-    plt.title("Original image")
-
-    convolve_red(image, h)
-    convolve_green(image, h)
-    plt.show()
+CROPPED_PERCENT = 0.6
 
 
 def convolve_red(image, h):
@@ -158,23 +101,71 @@ def convolve_red(image, h):
     plt.imshow(red_conv > 4)
     plt.title("Convolved red")
 
+    relevant_list = np.where(red_conv > 4, red_conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=15)
+    coordinates -= 5
+    return coordinates
+
 
 def convolve_green(image, h):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
-    red_conv = sg.convolve2d(green_filtered_image, kernel)
-    plt.imshow(red_conv > 4)
+    green_conv = sg.convolve2d(green_filtered_image, kernel)
+    plt.imshow(green_conv > 4)
     plt.title("Convolved green")
 
+    relevant_list = np.where(green_conv > 4, green_conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=15)
+    coordinates -= 5
+    return coordinates
 
-def make_image_grayscale(image_path):
-    im = plt.imread(image_path)
-    img = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    return img
+
+# def find_specific_color(image, color: int):
+#     img_color = image[:, :, color]
+#     conv = sg.convolve2d(img_color, kernel)
+#     relevant_list = np.where(conv > 5, conv, 0)
+#     coordinates = peak_local_max(relevant_list, min_distance=15)
+#     coordinates -= 5
+#     return coordinates
 
 
-def resize_images(image, new_size):
-    return cv2.resize(image, new_size)
+def find_tfl_lights(image: np.ndarray, *args):
+    """
+    Detect candidates for TFL lights. Use image, kwargs
+    :param image: The image itself as np.uint8, shape of (H, W, 3)
+    :param kwargs: Whatever config you want to pass in here
+    :return: 4-tuple of x_red, y_red, x_green, y_green
+    """
+
+    plt.imshow(image)
+    plt.title("Original image")
+
+    red_coordinates = convolve_red(image, args[0])
+    green_coordinates = convolve_green(image, args[0])
+    return red_coordinates[:, 1], red_coordinates[:, 0], green_coordinates[:, 1], green_coordinates[:, 0]
+
+
+def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
+    """ Run the attention code """
+    
+    if json_path is None:
+        objects = None
+    else:
+        gt_data = json.load(open(json_path))
+        what = ['traffic light']
+        objects = [o for o in gt_data['objects'] if o['label'] in what]
+
+    if not objects:
+        image = np.array(plt.imread(image_path))
+        cropped_image = image[:int(image.shape[0] * CROPPED_PERCENT), :]
+        h = plt.subplot(2, 2, 1)
+
+        red_x, red_y, green_x, green_y = find_tfl_lights(cropped_image, h)
+        plt.subplot(2, 2, 4, sharex=h, sharey=h)
+        plt.imshow(cropped_image)
+        plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
+        plt.plot(red_x, red_y, 'ro', color='r', markersize=3)
+        plt.show()
 
 
 def main(argv=None):
@@ -182,12 +173,13 @@ def main(argv=None):
     Consider looping over some images from here, so you can manually exmine the results
     Keep this functionality even after you have all system running, because you sometime want to debug/improve a module
     :param argv: In case you want to programmatically run this"""
+
     parser = argparse.ArgumentParser("Test TFL attention mechanism")
     parser.add_argument('-i', '--image', type=str, help='Path to an image')
     parser.add_argument("-j", "--json", type=str, help="Path to json GT for comparison")
     parser.add_argument('-d', '--dir', type=str, help='Directory to scan images in')
     args = parser.parse_args(argv)
-    default_base = "test"
+    default_base = "testr"
 
     if args.dir is None:
         args.dir = default_base
@@ -195,7 +187,6 @@ def main(argv=None):
 
     for image in flist:
         json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
-
         if not os.path.exists(json_fn):
             json_fn = None
         test_find_tfl_lights(image, json_fn)
@@ -209,4 +200,3 @@ def main(argv=None):
 
 if __name__ == '__main__':
     main()
-
