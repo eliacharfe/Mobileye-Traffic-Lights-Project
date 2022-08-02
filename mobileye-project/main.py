@@ -42,18 +42,18 @@ except ImportError:
 #                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
 #                    [0.64, 0.64, 0.64, 0.64, 0.64]])
 
-# BLACK = -0.64
-# WHITE = 0.36
-# kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
+BLACK = -0.64
+WHITE = 0.36
+kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
 
 # BLACK = -0.4
@@ -74,20 +74,20 @@ except ImportError:
 #                    ])
 #
 
-BLACK = -0.54
-WHITE = 0.26666666667
-kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-                   [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
-                   ])
+# BLACK = -0.54
+# WHITE = 0.26666666667
+# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+#                    [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
+#                    ])
 
 threshold = 100
 
@@ -122,9 +122,11 @@ def show_image_and_gt(image, objs, fig_num=None):
 def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
     # image = np.array(make_image_grayscale(image_path))
-    image = np.array(Image.open(image_path))
+    image = np.array(plt.imread(image_path))
+
+    cropped_image = image[: int(image.shape[0] * 0.6), :]
     # blue, green, red = cv2.split(image)
-    show_image(image)
+    show_image(cropped_image)
 
     # image = resize_images(image, (256, 256))
     # image = np.array(Image.open(image_path))
@@ -146,15 +148,15 @@ def plot_image():
 
 
 def show_image(image):
-    print(image.shape)
-    print(kernel.shape)
-    print("kernel sum: " + str(kernel.sum()))
+    # print(image.shape)
+    # print(kernel.shape)
+    # print("kernel sum: " + str(kernel.sum()))
 
     plot_image()
     h = plt.subplot(111)
     plt.imshow(image)
 
-    convolve_red(image, h)
+    # convolve_red(image, h)
     convolve_green(image, h)
 
     plt.show(block=True)
@@ -162,30 +164,30 @@ def show_image(image):
 
 
 def convolve_red(image, h):
-    red_filtered_image = Image.fromarray(image[:, :, 0])
+    # red_filtered_image = Image.fromarray(image[:, :, 0])
+    red_filtered_image = image[:, :, 0]
     plot_image()
     plt.subplot(111, sharex=h, sharey=h)
-    red_conv = sg.convolve(red_filtered_image, kernel)
-    plt.imshow(red_conv, cmap='gray')
+    red_conv = sg.convolve2d(red_filtered_image , kernel)
+    plt.imshow(red_conv > 4)
     # plt.imshow(red_conv) # ??
-    red_image_conv = Image.fromarray(red_conv)
-    plot_image()
-    plt.subplot(111, sharex=h, sharey=h)
-    plt.imshow(red_image_conv)
+    # red_image_conv = Image.fromarray(red_conv)
+    # plot_image()
+    # plt.subplot(111, sharex=h, sharey=h)
+    # plt.imshow(red_image_conv)
 
 
 def convolve_green(image, h):
-    green_filtered_image = Image.fromarray(image[:, :, 1])
+    green_filtered_image = image[:, :, 0]
     plot_image()
     plt.subplot(111, sharex=h, sharey=h)
-    plt.imshow(green_filtered_image)
-    green_conv = sg.convolve(green_filtered_image, kernel)
-    plt.imshow(green_conv, cmap='gray')
+    red_conv = sg.convolve2d(green_filtered_image, kernel)
+    plt.imshow(red_conv > 4)
 
-    green_image_conv = Image.fromarray(green_conv)
-    plot_image()
-    plt.subplot(111, sharex=h, sharey=h)
-    plt.imshow(green_image_conv)
+    # green_image_conv = Image.fromarray(green_conv)
+    # plot_image()
+    # plt.subplot(111, sharex=h, sharey=h)
+    # plt.imshow(green_image_conv)
 
 
 def make_image_grayscale(image_path):
