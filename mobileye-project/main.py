@@ -42,17 +42,17 @@ except ImportError:
 #                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
 #                    [0.64, 0.64, 0.64, 0.64, 0.64]])
 
-BLACK = -0.64
-WHITE = 0.36
-kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+BLACK = -0.52
+WHITE = 0.48
+kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+                   [BLACK, BLACK, BLACK,  WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK],
+                   [BLACK, BLACK, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, BLACK, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK],
+                   [BLACK, BLACK, BLACK,  WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK],
                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
 
@@ -97,12 +97,13 @@ def convolve_red(image, h):
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filtered_image = image[:, :, 0]
     plt.subplot(2, 2, 2, sharex=h, sharey=h)
-    red_conv = sg.convolve2d(red_filtered_image , kernel)
-    plt.imshow(red_conv > 4)
+    red_conv = sg.convolve2d(red_filtered_image, kernel)
+    plt.imshow(red_conv)
+    #plt.imshow(red_conv > 6)
     plt.title("Convolved red")
 
-    relevant_list = np.where(red_conv > 4, red_conv, 0)
-    coordinates = peak_local_max(relevant_list, min_distance=15)
+    relevant_list = np.where(red_conv > 5.10, red_conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=35)
     coordinates -= 5
     return coordinates
 
@@ -111,11 +112,12 @@ def convolve_green(image, h):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
     green_conv = sg.convolve2d(green_filtered_image, kernel)
-    plt.imshow(green_conv > 4)
+    plt.imshow(green_conv)
+    #plt.imshow(green_conv > 6)
     plt.title("Convolved green")
 
-    relevant_list = np.where(green_conv > 4, green_conv, 0)
-    coordinates = peak_local_max(relevant_list, min_distance=15)
+    relevant_list = np.where(green_conv >= 4.5, green_conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=35)
     coordinates -= 5
     return coordinates
 
@@ -165,6 +167,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
         plt.imshow(cropped_image)
         plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
         plt.plot(red_x, red_y, 'ro', color='r', markersize=3)
+        plt.title(f"black = {BLACK}, white = {WHITE}")
         plt.show()
 
 
@@ -179,7 +182,7 @@ def main(argv=None):
     parser.add_argument("-j", "--json", type=str, help="Path to json GT for comparison")
     parser.add_argument('-d', '--dir', type=str, help='Directory to scan images in')
     args = parser.parse_args(argv)
-    default_base = "testr"
+    default_base = "test"
 
     if args.dir is None:
         args.dir = default_base
