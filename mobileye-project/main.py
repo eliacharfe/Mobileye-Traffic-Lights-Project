@@ -121,15 +121,9 @@ def show_image_and_gt(image, objs, fig_num=None):
 
 def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
-    # image = np.array(make_image_grayscale(image_path))
     image = np.array(plt.imread(image_path))
-
     cropped_image = image[: int(image.shape[0] * 0.6), :]
-    # blue, green, red = cv2.split(image)
     show_image(cropped_image)
-
-    # image = resize_images(image, (256, 256))
-    # image = np.array(Image.open(image_path))
     # if json_path is None:
     #     objects = None
     # else:
@@ -142,52 +136,35 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
 
-def plot_image():
-    plt.figure()
-    plt.clf()
-
-
 def show_image(image):
     # print(image.shape)
     # print(kernel.shape)
     # print("kernel sum: " + str(kernel.sum()))
 
-    plot_image()
-    h = plt.subplot(111)
+    h = plt.subplot(2, 2, 1)
     plt.imshow(image)
+    plt.title("Original image")
 
-    # convolve_red(image, h)
+    convolve_red(image, h)
     convolve_green(image, h)
-
-    plt.show(block=True)
-    # conv = sg.convolve2d(image, kernel)
+    plt.show()
 
 
 def convolve_red(image, h):
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filtered_image = image[:, :, 0]
-    plot_image()
-    plt.subplot(111, sharex=h, sharey=h)
+    plt.subplot(2, 2, 2, sharex=h, sharey=h)
     red_conv = sg.convolve2d(red_filtered_image , kernel)
     plt.imshow(red_conv > 4)
-    # plt.imshow(red_conv) # ??
-    # red_image_conv = Image.fromarray(red_conv)
-    # plot_image()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(red_image_conv)
+    plt.title("Convolved red")
 
 
 def convolve_green(image, h):
-    green_filtered_image = image[:, :, 0]
-    plot_image()
-    plt.subplot(111, sharex=h, sharey=h)
+    green_filtered_image = image[:, :, 1]
+    plt.subplot(2, 2, 3, sharex=h, sharey=h)
     red_conv = sg.convolve2d(green_filtered_image, kernel)
     plt.imshow(red_conv > 4)
-
-    # green_image_conv = Image.fromarray(green_conv)
-    # plot_image()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(green_image_conv)
+    plt.title("Convolved green")
 
 
 def make_image_grayscale(image_path):
@@ -233,19 +210,3 @@ def main(argv=None):
 if __name__ == '__main__':
     main()
 
-
-# Convert image RGB to grayscale
-# from PIL import Image
-# img = Image.open('image.png').convert('L')
-# img.save('greyscale.png')
-
-# threshold = 100
-#
-# gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-# kernel = np.ones((9, 9), np.uint8)
-# tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)
-# ret, thresh = cv2.threshold(tophat, threshold, 255, cv2.THRESH_BINARY)
-#
-# dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-# ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
-# watershed = cv2.watershed(im, markers)
