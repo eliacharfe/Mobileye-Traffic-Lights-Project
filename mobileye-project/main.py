@@ -10,215 +10,67 @@ try:
     import matplotlib.pyplot as plt
     import cv2
     from skimage.feature import peak_local_max
+
 except ImportError:
     print("Need to fix the installation")
     raise
 
-
-# kernel = np.array([[-0.04, -0.04, -0.04, -0.04, -0.04],
-#                    [-0.04, 0.04,  0.04, 0.04, -0.04],
-#                    [-0.04,  0.04,  0.04, 0.04, -0.04],
-#                    [-0.04,  0.04,  0.04,  0.04, -0.04],
-#                    [-0.04, -0.04, -0.04, -0.04, -0.04]])
-#
-#
-# kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64],
-#                    [-0.64, 1.1377777777,  1.1377777777, 1.1377777777, -0.64],
-#                    [-0.64,  1.1377777777,  1.1377777777, 1.1377777777, -0.64],
-#                    [-0.64,  1.1377777777,  1.1377777777,  1.1377777777, -0.64],
-#                    [-0.64, -0.64, -0.64, -0.64, -0.64]])
-
-#
-# kernel = np.array([[0.04, 0.04, 0.04, 0.04, 0.04],
-#                    [0.04, -0.04,  -0.04, -0.04, 0.04],
-#                    [0.04,  -0.04,  -0.04, -0.04, 0.04],
-#                    [0.04,  -0.04,  -0.04,  -0.04,  0.04],
-#                    [0.04, 0.04, 0.04, 0.04, 0.04]])
-#
-#
-# kernel = np.array([[0.64, 0.64, 0.64, 0.64, 0.64],
-#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
-#                    [0.64,  -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
-#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
-#                    [0.64, 0.64, 0.64, 0.64, 0.64]])
-
-# BLACK = -0.64
-# WHITE = 0.36
-
-BLACK = -0.54
-WHITE = 0.26666666667
-
-# kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
-
-kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-                   [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
-                   ])
-
+BLACK = -0.64
+WHITE = 0.36
 threshold = 100
+CROPPED_PERCENT = 0.6
+kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
 
-def find_tfl_lights(c_image: np.ndarray, **kwargs):
+def find_specific_color(image, color: int):
+    img_color = image[:, :, color]
+    conv = sg.convolve2d(img_color, kernel)
+    relevant_list = np.where(conv > 5, conv, 0)
+    coordinates = peak_local_max(relevant_list, min_distance=15)
+    coordinates -= 5
+    return coordinates
+
+def find_tfl_lights(image: np.ndarray, **kwargs):
     """
-    Detect candidates for TFL lights. Use c_image, kwargs and you imagination to implement
+    Detect candidates for TFL lights. Use image, kwargs
     :param c_image: The image itself as np.uint8, shape of (H, W, 3)
     :param kwargs: Whatever config you want to pass in here
     :return: 4-tuple of x_red, y_red, x_green, y_green
     """
-    ### WRITE YOUR CODE HERE ###
-    ### USE HELPER FUNCTIONS ###
+    cropped_image = image[:int(image.shape[0] * CROPPED_PERCENT), :]
 
-    return [500, 510, 520], [500, 500, 500], [700, 710], [500, 500]
-
-
-### GIVEN CODE TO TEST YOUR IMPLENTATION AND PLOT THE PICTURES
-def show_image_and_gt(image, objs, fig_num=None):
-    plt.figure(fig_num).clf()
-    plt.imshow(image)
-    labels = set()
-    if objs is not None:
-        for o in objs:
-            poly = np.array(o['polygon'])[list(np.arange(len(o['polygon']))) + [0]]
-            plt.plot(poly[:, 0], poly[:, 1], 'r', label=o['label'])
-            labels.add(o['label'])
-        if len(labels) > 1:
-            plt.legend()
+    red_coordinates = find_specific_color(cropped_image, 0)
+    green_coordinates = find_specific_color(cropped_image, 1)
+    return red_coordinates[:, 1], red_coordinates[:, 0], green_coordinates[:, 1], green_coordinates[:, 0]
 
 
 def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
-    image = np.array(make_image_grayscale(image_path))
-
-    # image *= 255
-    # image = image.astype(np.unit8)
-    plot_image(image)
-
-    # image = resize_images(image, (256, 256))
-    # image = np.array(Image.open(image_path))
-    # if json_path is None:
-    #     objects = None
-    # else:
-    #     gt_data = json.load(open(json_path))
-    #     what = ['traffic light']
-    #     objects = [o for o in gt_data['objects'] if o['label'] in what]
-    # show_image_and_gt(image, objects, fig_num)
-    #
-    # tophat = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
-    # ret, thresh = cv2.threshold(tophat, threshold, 255, cv2.THRESH_BINARY)
-    #
-    # dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-    # ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
-    # watershed = cv2.watershed(image, markers)
-    #
-    # plt.imshow(watershed)
-
-    # th, im_th = cv2.threshold(image, 220, 255, cv2.THRESH_BINARY_INV);
-    # im_floodfill = im_th.copy()
-    # h, w = im_th.shape[:2]
-    # mask = np.zeros((h + 2, w + 2), np.uint8)
-    # cv2.floodFill(im_floodfill, mask, (0, 0), 255);
-    # im_floodfill_inv = cv2.bitwise_not(im_floodfill)
-    # im_out = im_floodfill_inv # im_th |
-    # cv2.imshow("Thresholded Image", im_th)
-    # cv2.imshow("Floodfilled Image", im_floodfill)
-    # cv2.imshow("Inverted Floodfilled Image", im_floodfill_inv)
-    # cv2.imshow("Foreground", im_out)
-    # cv2.waitKey(0)
-
-    # plt.figure()
-    # plt.clf()
-    # h = plt.subplot(111)
-    # plt.imshow(im_th)
-
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_floodfill)
-    #
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_floodfill_inv)
-    #
-    # plt.figure()
-    # plt.clf()
-    # plt.subplot(111, sharex=h, sharey=h)
-    # plt.imshow(im_out)
-
-
+    image = np.array(plt.imread(image_path))
+    plt.imshow(image)
     red_x, red_y, green_x, green_y = find_tfl_lights(image)
     plt.plot(red_x, red_y, 'ro', color='r', markersize=4)
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
 
-def plot_image(image):
-    # print(image.shape)
-    # print(kernel.shape)
-    print("kernel sum: " + str(kernel.sum()))
-    plt.figure()
+def plot_image(image, original_img):
+    plt.figure(56)
     plt.clf()
     h = plt.subplot(111)
-    plt.imshow(image, cmap='gray')
-    plt.figure()
+    plt.imshow(image)
+    plt.figure(57)
     plt.clf()
     plt.subplot(111, sharex=h, sharey=h)
-
-    conv = sg.convolve2d(image, kernel)
-    plt.imshow(conv > 2.5, cmap='gray')
-    # plt.gray()
-
-    # coordinates = peak_local_max(image, min_distance=10)
-    # plt.plot(coordinates[:, 1], coordinates[:, 0], 'ro', color='r', markersize=4)
-    # plt.imshow(image, cmap='gray')
-
-    # filter_arr = [[]]
-    #
-    # # go through each element in arr
-    # for o in conv:
-    #     temp = []
-    #     for elem in o:
-    #     # if the element is higher than 42, set the value to True, otherwise False:
-    #         if elem > 3:
-    #             temp.append(True)
-    #         else:
-    #             temp.append(False)
-    #     filter_arr.append(temp)
-    # newarr = conv[filter_arr]
-    #
-    # coordinates = peak_local_max(newarr, min_distance=10)
-    # plt.plot(coordinates[:, 1], coordinates[:, 0], 'ro', color='r', markersize=4)
-    # plt.imshow(image, cmap='gray')
-
-
-
-
-def make_image_grayscale(image_path):
-    im = plt.imread(image_path)
-    img = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    return img
-
-
-def resize_images(image, new_size):
-    return cv2.resize(image, new_size)
-
-
+    plt.imshow(image)
 
 
 def main(argv=None):
@@ -240,7 +92,6 @@ def main(argv=None):
 
     for image in flist:
         json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
-
         if not os.path.exists(json_fn):
             json_fn = None
         test_find_tfl_lights(image, json_fn)
@@ -255,19 +106,15 @@ def main(argv=None):
 if __name__ == '__main__':
     main()
 
-
-# Convert image RGB to grayscale
-# from PIL import Image
-# img = Image.open('image.png').convert('L')
-# img.save('greyscale.png')
-
-# threshold = 100
-#
-# gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-# kernel = np.ones((9, 9), np.uint8)
-# tophat = cv2.morphologyEx(gray, cv2.MORPH_TOPHAT, kernel)
-# ret, thresh = cv2.threshold(tophat, threshold, 255, cv2.THRESH_BINARY)
-#
-# dist_transform = cv2.distanceTransform(thresh, cv2.DIST_L2, 5)
-# ret, markers = cv2.connectedComponents(np.uint8(dist_transform))
-# watershed = cv2.watershed(im, markers)
+#   For filtering the image using json
+#   def show_image_and_gt(image, objs, fig_num=None):
+#     plt.figure(fig_num).clf()
+#     plt.imshow(image)
+#     labels = set()
+#     if objs is not None:
+#         for o in objs:
+#             poly = np.array(o['polygon'])[list(np.arange(len(o['polygon']))) + [0]]
+#             plt.plot(poly[:, 0], poly[:, 1], 'r', label=o['label'])
+#             labels.add(o['label'])
+#         if len(labels) > 1:
+#             plt.legend()
