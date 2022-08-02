@@ -9,6 +9,7 @@ try:
     from PIL import Image
     import matplotlib.pyplot as plt
     import cv2
+    import pandas as pd
     from skimage.feature import peak_local_max
 except ImportError:
     print("Need to fix the installation")
@@ -92,8 +93,10 @@ kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLAC
 threshold = 100
 CROPPED_PERCENT = 0.6
 
+tfl_table = pd.DataFrame(columns=['x_coordinate', 'y_coordinate', 'color', 'conv_value', 'image_name'])
 
-def convolve_red(image, h):
+
+def convolve_red(image, h, image_path):
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filtered_image = image[:, :, 0]
     plt.subplot(2, 2, 2, sharex=h, sharey=h)
@@ -105,10 +108,15 @@ def convolve_red(image, h):
     relevant_list = np.where(red_conv > 5.10, red_conv, 0)
     coordinates = peak_local_max(relevant_list, min_distance=35)
     coordinates -= 5
-    return coordinates
+
+    coordinates_info = list(map(lambda coordinate: [coordinate[0], coordinate[1], "r",
+                                                    red_conv[coordinate[0] + 5, coordinate[1] + 5],
+                                                    image_path], coordinates))
+
+    return coordinates, coordinates_info
 
 
-def convolve_green(image, h):
+def convolve_green(image, h, image_path):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
     green_conv = sg.convolve2d(green_filtered_image, kernel)
@@ -119,7 +127,12 @@ def convolve_green(image, h):
     relevant_list = np.where(green_conv >= 4.5, green_conv, 0)
     coordinates = peak_local_max(relevant_list, min_distance=35)
     coordinates -= 5
-    return coordinates
+
+    coordinates_info = list(map(lambda coordinate: [coordinate[0], coordinate[1], "g",
+                                                    green_conv[coordinate[0] + 5, coordinate[1] + 5],
+                                                    image_path], coordinates))
+
+    return coordinates, coordinates_info
 
 
 # def find_specific_color(image, color: int):
@@ -142,8 +155,13 @@ def find_tfl_lights(image: np.ndarray, *args):
     plt.imshow(image)
     plt.title("Original image")
 
-    red_coordinates = convolve_red(image, args[0])
-    green_coordinates = convolve_green(image, args[0])
+    red_coordinates, red_coordinates_info = convolve_red(image, args[0], args[1])
+    green_coordinates, green_coordinates_info = convolve_green(image, args[0], args[1])
+
+    global tfl_table
+    tfl_table = pd.concat([tfl_table, pd.DataFrame(red_coordinates_info + green_coordinates_info,
+                                                   columns=['x_coordinate', 'y_coordinate', 'color', 'conv_value',
+                                                            'image_name'])], ignore_index=True)
     return red_coordinates[:, 1], red_coordinates[:, 0], green_coordinates[:, 1], green_coordinates[:, 0]
 
 
@@ -162,7 +180,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
         cropped_image = image[:int(image.shape[0] * CROPPED_PERCENT), :]
         h = plt.subplot(2, 2, 1)
 
-        red_x, red_y, green_x, green_y = find_tfl_lights(cropped_image, h)
+        red_x, red_y, green_x, green_y = find_tfl_lights(cropped_image, h, image_path)
         plt.subplot(2, 2, 4, sharex=h, sharey=h)
         plt.imshow(cropped_image)
         plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
