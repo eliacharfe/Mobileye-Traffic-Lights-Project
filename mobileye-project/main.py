@@ -44,13 +44,13 @@ except ImportError:
 #                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
 #                    [0.64, 0.64, 0.64, 0.64, 0.64]])
 
-# BLACK = -0.64
-# WHITE = 0.36
+BLACK = -0.64
+WHITE = 0.36
 
-BLACK = -0.54
-WHITE = 0.26666666667
+#BLACK = -0.54
+#WHITE = 0.26666666667
 
-CROPPED_PERCENT = 0.55
+CROPPED_PERCENT = 0.6
 
 kernel = np.array([[BLACK,BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
@@ -110,20 +110,20 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     """ Run the attention code """
     original_image = np.array(plt.imread(image_path)) #in case we will need a colored picture.
 
-    cropped_image = original_image[0:int(original_image.shape[0]*CROPPED_PERCENT), 0:original_image.shape[1]]
+    cropped_image = original_image[:int(original_image.shape[0]*CROPPED_PERCENT), :]
 
     gray_image = np.array(make_image_grayscale(image_path))
     gray_cropped_image = gray_image[0:int(gray_image.shape[0]*CROPPED_PERCENT), 0:gray_image.shape[1]]
 
-    red_img = cropped_image.copy()
-    red_img[:,:,1] = 0
-    red_img[:,:,2] = 0
-    red_img = cropped_image[:,:,0]
+    # red_img = cropped_image.copy()
+    # red_img[:, :, 1] = 0
+    # red_img[:, :, 2] = 0
+    red_img = cropped_image[:, :, 0]
 
 
     # image *= 255
     # image = image.astype(np.unit8)
-    plot_image(red_img,cropped_image)
+    plot_image(red_img, cropped_image)
 
     # image = resize_images(image, (256, 256))
     # image = np.array(Image.open(image_path))
@@ -183,7 +183,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
     plt.plot(green_x, green_y, 'ro', color='g', markersize=4)
 
 
-def plot_image(image,original_img):
+def plot_image(image, original_img):
     # print(image.shape)
     # print(kernel.shape)
     print("kernel sum: " + str(kernel.sum()))
@@ -196,9 +196,10 @@ def plot_image(image,original_img):
     # plt.clf()
     plt.subplot(1, 2, 2, sharex=h, sharey=h)
     conv = sg.convolve2d(image, kernel)
-    plt.imshow(conv > 2.8, cmap='gray')
+    plt.imshow(conv > 4, cmap='gray')
+    #plt.imshow(conv)
+    plt.title("convo on 1 color:")
 
-    plt.title("image after convolution:")
     plt.show()
 
     # plt.gray()
