@@ -55,11 +55,11 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=None):
         objects = [o for o in gt_data['objects'] if o['label'] in what]
 
     # show_image_and_gt(image, objects, fig_num)
-    plt.figure(56)
+    plt.figure()
     plt.clf()
     h = plt.subplot(111)
     plt.imshow(image)
-    plt.figure(57)
+    plt.figure()
     plt.clf()
     plt.subplot(111, sharex=h, sharey=h)
     plt.imshow(image)

@@ -4,27 +4,19 @@ import numpy as np
 from scipy import ndimage as ndi
 from PIL import Image
 
-image = np.array(Image.open(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000540_000019_leftImg8bit.png"))
+image = np.array(Image.open(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000455_000019_leftImg8bit.png"))
 
 
 # read the image
-img = cv2.imread(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000540_000019_leftImg8bit.png")
+img = cv2.imread(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000455_000019_leftImg8bit.png")
 
 # convert the BGR image to HSV colour space
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 # lower mask (0-10)
-lower_red = np.array([0, 50, 50])
-upper_red = np.array([10, 255, 255])
-mask0 = cv2.inRange(hsv, lower_red, upper_red)
-
-# upper mask (170-180)
-lower_red = np.array([170, 50, 50])
-upper_red = np.array([180, 255, 255])
-mask1 = cv2.inRange(hsv, lower_red, upper_red)
-
-# join my masks
-mask = mask0 + mask1
+lower_green = np.array([112, 167, 128])
+upper_green = np.array([180, 252, 190])
+mask = cv2.inRange(hsv, lower_green, upper_green)
 
 # perform bitwise and on the original image arrays using the mask
 res = cv2.bitwise_and(img, img, mask=mask)
