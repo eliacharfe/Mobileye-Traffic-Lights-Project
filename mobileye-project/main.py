@@ -4,6 +4,7 @@ try:
     import glob
     import argparse
     import numpy as np
+    import pandas as pd
     from scipy import signal as sg
     from scipy import ndimage as ndi
     from scipy.ndimage import maximum_filter
@@ -219,6 +220,10 @@ def main(argv=None):
     parser.add_argument('-d', '--dir', type=str, help='Directory to scan images in')
     args = parser.parse_args(argv)
     default_base = "test"
+
+    pd.set_option('display.max_columns', None,'display.max_rows', None)
+    df = pd.read_hdf('attention_results.h5')
+    print(df)
 
     if args.dir is None:
         args.dir = default_base
