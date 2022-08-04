@@ -12,6 +12,7 @@ try:
     import matplotlib.pyplot as plt
     import cv2
     from skimage.feature import peak_local_max
+    import re
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -94,8 +95,25 @@ kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLAC
 threshold = 100
 CROPPED_PERCENT = 0.6
 
+PATH_HEAD = "C:/leftImg8bit/train/"
 
-def convolve_red(image, h,red_filter):
+
+def create_data_structure_images_path_name(df):
+    dictionary = {}
+    for image_name in df["path"]:
+        if image_name not in dictionary.keys():
+            dir_name = re.split("_", image_name)[0]
+            path_image = PATH_HEAD + dir_name + '/' + image_name
+            dictionary[image_name] = path_image
+            # dictionary.setdefault(image_name, []).append(path_image)
+    return dictionary
+
+
+def get_path_image(image_name: str, dictionary: dict):
+    return dictionary[image_name]
+
+
+def convolve_red(image, h, red_filter):
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filter_lee = red_filter
     red_filtered_image = image[:, :, 0]
@@ -131,14 +149,6 @@ def convolve_green(image, h):
     return coordinates
 
 
-# def find_specific_color(image, color: int):
-#     img_color = image[:, :, color]
-#     conv = sg.convolve2d(img_color, kernel)
-#     relevant_list = np.where(conv > 5, conv, 0)
-#     coordinates = peak_local_max(relevant_list, min_distance=15)
-#     coordinates -= 5
-#     return coordinates
-
 def red_filter(image_path):
     # lower mask (0-10)
 
@@ -165,6 +175,7 @@ def red_filter(image_path):
     image_max = ndi.maximum_filter(res, size=20, mode='constant')
     image_max_2d = image_max[:, :, 0]
     return image_max_2d
+
 
 def find_tfl_lights(image: np.ndarray, *args):
     """
@@ -221,10 +232,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
     default_base = "test"
 
-    pd.set_option('display.max_columns', None,'display.max_rows', None)
-    df = pd.read_hdf('attention_results.h5')
-    print(df)
-
     if args.dir is None:
         args.dir = default_base
     flist = glob.glob(os.path.join(args.dir, '*_leftImg8bit.png'))
@@ -233,7 +240,7 @@ def main(argv=None):
         json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
         if not os.path.exists(json_fn):
             json_fn = None
-        test_find_tfl_lights(image, json_fn)
+        # test_find_tfl_lights(image, json_fn)
 
     if len(flist):
         print("You should now see some images, with the ground truth marked on them. Close all to quit.")
@@ -243,4 +250,15 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+
+    pd.set_option('display.max_columns', None, 'display.max_rows', None)
+    df = pd.read_hdf('attention_results.h5')
+
+    my_dict = create_data_structure_images_path_name(df)
+
+    my_image_path = get_path_image("aachen_000001_000019_leftImg8bit.png", my_dict)
+    print(my_image_path)
+
+
+
