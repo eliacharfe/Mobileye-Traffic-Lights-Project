@@ -1,3 +1,7 @@
+from typing import Tuple, List
+
+from numpy.typing import NDArray
+
 try:
     import os
     import json
@@ -95,25 +99,8 @@ kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLAC
 threshold = 100
 CROPPED_PERCENT = 0.6
 
-PATH_HEAD = "C:/leftImg8bit/train/"
 
-
-def create_data_structure_images_path_name(df):
-    dictionary = {}
-    for image_name in df["path"]:
-        if image_name not in dictionary.keys():
-            dir_name = re.split("_", image_name)[0]
-            path_image = PATH_HEAD + dir_name + '/' + image_name
-            dictionary[image_name] = path_image
-            # dictionary.setdefault(image_name, []).append(path_image)
-    return dictionary
-
-
-def get_path_image(image_name: str, dictionary: dict):
-    return dictionary[image_name]
-
-
-def convolve_red(image, h, red_filter):
+def convolve_red(image: NDArray, h: float, red_filter: NDArray) -> List[Tuple]:
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filter_lee = red_filter
     red_filtered_image = image[:, :, 0]
@@ -135,7 +122,7 @@ def convolve_red(image, h, red_filter):
     return coordinates
 
 
-def convolve_green(image, h):
+def convolve_green(image: NDArray, h: float):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
     green_conv = sg.convolve2d(green_filtered_image, kernel)
@@ -149,7 +136,7 @@ def convolve_green(image, h):
     return coordinates
 
 
-def red_filter(image_path):
+def red_filter(image_path: str) -> NDArray:
     # lower mask (0-10)
 
     image = np.array(Image.open(image_path))
@@ -177,14 +164,13 @@ def red_filter(image_path):
     return image_max_2d
 
 
-def find_tfl_lights(image: np.ndarray, *args):
+def find_tfl_lights(image: NDArray, *args: any) -> Tuple[List[float]]:
     """
     Detect candidates for TFL lights. Use image, kwargs
     :param image: The image itself as np.uint8, shape of (H, W, 3)
-    :param kwargs: Whatever config you want to pass in here
+    :param args: Whatever config you want to pass in here
     :return: 4-tuple of x_red, y_red, x_green, y_green
     """
-
     plt.imshow(image)
     plt.title("Original image")
 
@@ -193,7 +179,7 @@ def find_tfl_lights(image: np.ndarray, *args):
     return red_coordinates[:, 1], red_coordinates[:, 0], green_coordinates[:, 1], green_coordinates[:, 0]
 
 
-def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple):
+def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple) -> None:
     """ Run the attention code """
     
     if json_path is None:
@@ -240,7 +226,7 @@ def main(argv=None):
         json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
         if not os.path.exists(json_fn):
             json_fn = None
-        # test_find_tfl_lights(image, json_fn)
+        test_find_tfl_lights(image, json_fn)
 
     if len(flist):
         print("You should now see some images, with the ground truth marked on them. Close all to quit.")
@@ -250,15 +236,9 @@ def main(argv=None):
 
 
 if __name__ == '__main__':
-    # main()
+    main()
 
-    pd.set_option('display.max_columns', None, 'display.max_rows', None)
-    df = pd.read_hdf('attention_results.h5')
 
-    my_dict = create_data_structure_images_path_name(df)
-
-    my_image_path = get_path_image("aachen_000001_000019_leftImg8bit.png", my_dict)
-    print(my_image_path)
 
 
 
