@@ -53,12 +53,9 @@ def create_data():
     # (test)
     name_of_image = "aachen_000001_000019_leftImg8bit.png"
     path_img, label_img = get_values_by_name_key(name_of_image, my_dict)
-    print(path_img)
-    print(label_img)
+    return my_dict
 
 
-if __name__ == '__main__':
-    create_data()
 
 
 
