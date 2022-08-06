@@ -40,12 +40,12 @@ def create_bounding_rectangle(image, tf_details):
         tf_x, tf_y, tf_color, zoom = row[1][0:4]
         plt.plot(tf_x, tf_y, 'ro', color='r', markersize=3)
         if tf_color == 'r':
-            top_right = (tf_x + X_AXIS*zoom, tf_y - Y_AXIS*zoom)
-            bottom_left = (tf_x - X_AXIS*zoom, tf_y + (HEIGHT - Y_AXIS)*zoom)
+            top_right = (tf_x + X_AXIS*(1-zoom), tf_y - Y_AXIS*(1-zoom))
+            bottom_left = (tf_x - X_AXIS*(1-zoom), tf_y + (HEIGHT - Y_AXIS)*(1-zoom))
 
         else:
-            top_right = (tf_x + X_AXIS*zoom, tf_y - (HEIGHT - Y_AXIS)*zoom)
-            bottom_left = (tf_x - X_AXIS*zoom, tf_y + Y_AXIS*zoom)
+            top_right = (tf_x + X_AXIS*(1-zoom), tf_y - (HEIGHT - Y_AXIS)*(1-zoom))
+            bottom_left = (tf_x - X_AXIS*(1-zoom), tf_y + Y_AXIS*(1-zoom))
 
         rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
         rectangle_y = np.append(rectangle_y, [top_right[1], bottom_left[1]])
