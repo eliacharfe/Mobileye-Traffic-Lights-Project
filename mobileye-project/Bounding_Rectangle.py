@@ -79,8 +79,8 @@ def new_bounding_rectangle(image, tf_axis_and_color):
                     if gray[int(tf_y)-i][int(tf_x)] < 0.300:
                         size += i
                         break
-            top_left = (tf_x - 0.8 * size, tf_y - size)
-            bottom_right = (tf_x + 0.8 * size, tf_y + 4 * size)
+            top_right = (tf_x + 0.8 * size, tf_y - size)
+            bottom_left = (tf_x - 0.8 * size, tf_y + 4 * size)
 
         else:  # green color
             plt.plot(tf_x, tf_y, 'ro', color='g', markersize=3)
@@ -94,15 +94,15 @@ def new_bounding_rectangle(image, tf_axis_and_color):
                     if gray[int(tf_y)+i][int(tf_x)] < 0.300:
                         size += i
                         break
-            top_left = (tf_x - 0.8*size, tf_y - 2.8*size)
-            bottom_right = (tf_x+0.8*size, tf_y + size)
+            top_right = (tf_x + 0.8*size, tf_y - 2.8*size)
+            bottom_left = (tf_x - 0.8*size, tf_y + size)
 
         if size == -1:
             top_left = (tf_x, tf_y)
             bottom_right = (tf_x, tf_y)
 
-        rectangle_x = np.append(rectangle_x, [top_left[0], bottom_right[0]])
-        rectangle_y = np.append(rectangle_y, [top_left[1], bottom_right[1]])
+        rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
+        rectangle_y = np.append(rectangle_y, [top_right[1], bottom_left[1]])
 
     return rectangle_x, rectangle_y
 
