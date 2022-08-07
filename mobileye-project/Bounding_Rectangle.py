@@ -98,20 +98,19 @@ def new_bounding_rectangle(image, tf_axis_and_color):
 
 def calculate_percentage(num_orange_pix, total_pix):
     """Return True, False or Ignore"""
-    # return "is_ignored"
-    return True
+    percentage = 100 * float(num_orange_pix)/float(total_pix)
+    print(f"percent: {percentage}")
+    if percentage < 40:
+        return False
+    elif percentage > 70:
+        return True
+    return "is_ignored"
 
 
 def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_cropped_df):
-
-    print(temp_cropped_df)
+    # print(temp_cropped_df)
     label_path = paths_image[1]
-    # label_im = plt.imread(label_path)
     label_im = np.array(Image.open(label_path).convert('RGB'))
-
-    print(coordinates_x)
-    print(coordinates_y)
-
     top_right_arr = []
     bottom_left_arr = []
     for i in range(len(coordinates_x)):
@@ -121,11 +120,11 @@ def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_c
         else:
             bottom_left_arr.append(tuple_point)
 
-    print("top rights: ")
-    print(top_right_arr)
-
-    print("bottom lefts: ")
-    print(bottom_left_arr)
+    # print("top rights: ")
+    # print(top_right_arr)
+    #
+    # print("bottom lefts: ")
+    # print(bottom_left_arr)
 
     for i in range(len(top_right_arr)):
         crop_tl = label_im[int(top_right_arr[i][1]): int(bottom_left_arr[i][1]),
@@ -137,8 +136,8 @@ def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_c
         diff_y = int(bottom_left_arr[i][1]) - int(top_right_arr[i][1])
         sum_pixel_crop = diff_x * diff_y
 
-        print(f"sum pix: {sum_pixel_crop}")
-        print(f"counter orange: {count_orange_pixels}")
+        # print(f"sum pix: {sum_pixel_crop}")
+        # print(f"counter orange: {count_orange_pixels}")
 
         res = calculate_percentage(count_orange_pixels, sum_pixel_crop)
 
@@ -147,9 +146,9 @@ def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_c
         elif res:
             temp_cropped_df["is_true"][temp_cropped_df['x0'] == top_right_arr[i][0]] = True
 
-        print(temp_cropped_df)
-        plt.imshow(crop_tl)
-        plt.show()
+        # print(temp_cropped_df)
+        # plt.imshow(crop_tl)
+        # plt.show()
 
 
 def main():
@@ -172,7 +171,7 @@ def main():
         # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color)
 
         label_calculate(path_dict[image_name], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
-
+        print(temp_cropped_df)
         # crop_tf_from_image(dict_path[image_name][0], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
