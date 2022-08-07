@@ -68,23 +68,38 @@ def new_bounding_rectangle(image, tf_axis_and_color):
         size = -1
 
         if color == 'r':
-            for i in range(20):
-                if gray[int(tf_x)][tf_y+i] < 0.300:
-                    size = i
-                    top_left = (tf_x - 1.5 * i, tf_y + 3 * i)
-                    bottom_right = (tf_x + 1.5 * i, tf_y - 1.5 * i)
-                    break
+            plt.plot(tf_x, tf_y, 'ro', color='r', markersize=3)
+            for i in range(25):
+                if int(tf_y) + i < gray.shape[1]:
+                    if gray[int(tf_y)+i][int(tf_x)] < 0.300:
+                        size = i
+                        break
+            for i in range(25):
+                if int(tf_y) - i < gray.shape[1]:
+                    if gray[int(tf_y)-i][int(tf_x)] < 0.300:
+                        size += i
+                        break
+            top_left = (tf_x - 0.8 * size, tf_y - size)
+            bottom_right = (tf_x + 0.8 * size, tf_y + 4 * size)
+
         else:  # green color
-            for i in range(int(tf_y), int(tf_y) - 20):
-                if gray[int(tf_x)][i] < 0.300:
-                    size = i
-                    top_left = (tf_x - 1.5*i, tf_y - 3*i)
-                    bottom_right = (tf_x+1.5*i, tf_y + 1.5*i)
-                    break
+            plt.plot(tf_x, tf_y, 'ro', color='g', markersize=3)
+            for i in range(50):
+                if int(tf_y) - i > 0:
+                    if gray[int(tf_y)-i][int(tf_x)] < 0.300:
+                        size = i
+                        break
+            for i in range(50):
+                if int(tf_y) - i > 0:
+                    if gray[int(tf_y)+i][int(tf_x)] < 0.300:
+                        size += i
+                        break
+            top_left = (tf_x - 0.8*size, tf_y - 2.8*size)
+            bottom_right = (tf_x+0.8*size, tf_y + size)
 
         if size == -1:
-            top_left = (tf_x - 20, tf_y - 20)
-            bottom_right = (tf_x + 20, tf_y + 20)
+            top_left = (tf_x, tf_y)
+            bottom_right = (tf_x, tf_y)
 
         rectangle_x = np.append(rectangle_x, [top_left[0], bottom_right[0]])
         rectangle_y = np.append(rectangle_y, [top_left[1], bottom_right[1]])
@@ -108,16 +123,19 @@ def main():
         image_tf_details = df.loc[df['path'] == image_name][['x', 'y', 'col', 'zoom']]
         image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
         im = plt.imread(path_dict[image_name][0])
-        tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
-        # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color)
+
+        # switch between those two for different calculation: #
+        # tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
+        tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color)
+        #
 
         # label_calculate(path_dict[image_name], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
         # crop_tf_from_image(dict_path[image_name][0], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
-        cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
+        # cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
         plt.imshow(im)
-        plt.plot(tf_coordinates_x, tf_coordinates_y, 'ro', color='y', markersize=3)
+        plt.plot(tf_coordinates_x, tf_coordinates_y, 'mx', color='m', markersize=3)
         plt.show()
 
         # return cropped_df
