@@ -57,9 +57,9 @@ def create_bounding_rectangle(image, tf_details, temp_cropped_df):
     return rectangle_x, rectangle_y
 
 
-def new_bounding_rectangle(image, tf_axis_and_color):
+def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
+    seq = 0
     rectangle_x = np.array([], dtype='int64')
     rectangle_y = np.array([], dtype='int64')
 
@@ -79,19 +79,19 @@ def new_bounding_rectangle(image, tf_axis_and_color):
                     if gray[int(tf_y)-i][int(tf_x)] < 0.300:
                         size += i
                         break
-            top_right = (tf_x + 0.8 * size, tf_y - size)
-            bottom_left = (tf_x - 0.8 * size, tf_y + 4 * size)
+            top_right = (tf_x + size, tf_y - size)
+            bottom_left = (tf_x - size, tf_y + 4 * size)
 
         else:  # green color
             plt.plot(tf_x, tf_y, 'ro', color='g', markersize=3)
             for i in range(50):
                 if int(tf_y) - i > 0:
-                    if gray[int(tf_y)-i][int(tf_x)] < 0.300:
+                    if gray[int(tf_y)-i][int(tf_x)] < 0.250:
                         size = i
                         break
             for i in range(50):
                 if int(tf_y) - i > 0:
-                    if gray[int(tf_y)+i][int(tf_x)] < 0.300:
+                    if gray[int(tf_y)+i][int(tf_x)] < 0.250:
                         size += i
                         break
             top_right = (tf_x + 0.8*size, tf_y - 2.8*size)
@@ -103,6 +103,10 @@ def new_bounding_rectangle(image, tf_axis_and_color):
 
         rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
         rectangle_y = np.append(rectangle_y, [top_right[1], bottom_left[1]])
+
+        temp_cropped_df.loc[len(temp_cropped_df.index)] = \
+            [seq, False, False, '', top_right[0], bottom_left[0], top_right[1], bottom_left[1], tf_color]
+        seq += 1
 
     return rectangle_x, rectangle_y
 
@@ -126,7 +130,7 @@ def main():
 
         # switch between those two for different calculation: #
         # tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
-        tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color)
+        tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
         #
 
         # label_calculate(path_dict[image_name], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
