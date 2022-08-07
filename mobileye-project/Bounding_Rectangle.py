@@ -30,6 +30,9 @@ X_AXIS = 22
 Y_AXIS = 15
 HEIGHT = 115
 
+# ORANGE_PIXEL = [0.98, 0.667, 0.118]
+ORANGE_PIXEL = [0.98039216, 0.6666667, 0.11764706]
+
 
 def create_bounding_rectangle(image, tf_details, temp_cropped_df):
     im = image
@@ -92,6 +95,52 @@ def new_bounding_rectangle(image, tf_axis_and_color):
     return rectangle_x, rectangle_y
 
 
+def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_cropped_df):
+
+    label_path = paths_image[1]
+    label_im = plt.imread(label_path)
+
+    print(coordinates_x)
+    print(coordinates_y)
+
+    top_right_arr = []
+    bottom_left_arr = []
+    for i in range(len(coordinates_x)):
+        tuple_point = (coordinates_x[i], coordinates_y[i])
+        if not i % 2:
+            top_right_arr.append(tuple_point)
+        else:
+            bottom_left_arr.append(tuple_point)
+
+    print("top rights: ")
+    print(top_right_arr)
+
+    print("bottom lefts: ")
+    print(bottom_left_arr)
+
+    for i in range(len(top_right_arr)):
+        crop_tl = label_im[int(top_right_arr[i][1]): int(bottom_left_arr[i][1]),
+                           int(bottom_left_arr[i][0]): int(top_right_arr[i][0])]
+
+        # res = np.count_nonzero(np.all(crop_tl == ORANGE_PIXEL, axis=2))
+        # print(res)
+
+        # counter = 0
+        # for pixel in crop_tl:
+        #     # print(pixel)
+        #     if pixel == [0.98039216, 0.6666667,  0.11764706, 1.0]:
+        #         counter += 1
+
+        diff_x = int(top_right_arr[i][0]) - int(bottom_left_arr[i][0])
+        diff_y = int(bottom_left_arr[i][1]) - int(top_right_arr[i][1])
+        print(diff_x * diff_y)
+        # print(counter)
+        plt.imshow(crop_tl)
+        plt.show()
+
+
+
+
 def main():
     pd.set_option('display.max_columns', None, 'display.max_rows', None)
     df = pd.read_hdf('attention_results.h5')
@@ -111,7 +160,7 @@ def main():
         tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
         # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color)
 
-        # label_calculate(path_dict[image_name], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
+        label_calculate(path_dict[image_name], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
         # crop_tf_from_image(dict_path[image_name][0], im, tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
