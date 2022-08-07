@@ -61,6 +61,28 @@ def create_bounding_rectangle(image, tf_details, temp_cropped_df):
     return rectangle_x, rectangle_y
 
 
+def get_rect(gray, pix_range, tf_x, tf_y, threshold, color, op):
+    size = -1
+    for i in range(pix_range):
+        if int(tf_y) + i < gray.shape[0]:
+            if gray[int(tf_y) + i if op == '+' else int(tf_y) - i][int(tf_x)] < threshold:
+                size = i
+                break
+    for i in range(pix_range):
+        if int(tf_y) - i > 0:
+            if gray[int(tf_y) - i if op == '+' else int(tf_y) + i][int(tf_x)] < threshold:
+                size += i
+                break
+
+    if color == 'r':
+        top_right = (tf_x + size, tf_y - size if tf_y - size > 0 else 0)
+        bottom_left = (tf_x - size if tf_x - size > 0 else 0, tf_y + 4 * size)
+    else:
+        top_right = (tf_x + 0.8 * size, tf_y - 2.8 * size if tf_y - 2.8 * size > 0 else 0)
+        bottom_left = (tf_x - 0.8 * size if tf_x - 0.8 * size > 0 else 0, tf_y + size)
+    return top_right, bottom_left, size
+
+
 def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     seq = 0
@@ -69,35 +91,12 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
 
     for row in tf_axis_and_color.iterrows():
         tf_x, tf_y, color = row[1][:3]
-        size = -1
+
         plt.plot(tf_x, tf_y, 'ro', color=color, markersize=3)
         if color == 'r':
-            for i in range(25):
-                if int(tf_y) + i < gray.shape[0]:
-                    if gray[int(tf_y)+i][int(tf_x)] < 0.300:
-                        size = i
-                        break
-            for i in range(25):
-                if int(tf_y) - i > 0:
-                    if gray[int(tf_y)-i][int(tf_x)] < 0.300:
-                        size += i
-                        break
-            top_right = (tf_x + size, tf_y - size if tf_y - size > 0 else 0)
-            bottom_left = (tf_x - size if tf_x - size > 0 else 0, tf_y + 4 * size)
-
+            top_right, bottom_left, size = get_rect(gray, 25, tf_x, tf_y, 0.300, color, '+')
         else:  # green color
-            for i in range(50):
-                if int(tf_y) + i < gray.shape[0]:
-                    if gray[int(tf_y)-i][int(tf_x)] < 0.250:
-                        size = i
-                        break
-            for i in range(50):
-                if int(tf_y) - i > 0:
-                    if gray[int(tf_y)+i][int(tf_x)] < 0.250:
-                        size += i
-                        break
-            top_right = (tf_x + 0.8*size , tf_y - 2.8*size if tf_y - 2.8*size > 0 else 0)
-            bottom_left = (tf_x - 0.8 * size if tf_x - 0.8 * size > 0 else 0, tf_y + size)
+            top_right, bottom_left, size = get_rect(gray, 50, tf_x, tf_y, 0.250, color, '-')
 
         if size == -1 or size < 3:
             top_right = (tf_x + 5,tf_y - 2*5 if tf_y - 2*5 > 0 else 0)
