@@ -31,7 +31,8 @@ Y_AXIS = 15
 HEIGHT = 115
 
 # ORANGE_PIXEL = [0.98, 0.667, 0.118]
-ORANGE_PIXEL = [0.98039216, 0.6666667, 0.11764706]
+# ORANGE_PIXEL = [0.98039216, 0.6666667, 0.11764706]
+ORANGE_PIXEL = [250, 170, 30]
 
 
 def create_bounding_rectangle(image, tf_details, temp_cropped_df):
@@ -95,10 +96,18 @@ def new_bounding_rectangle(image, tf_axis_and_color):
     return rectangle_x, rectangle_y
 
 
+def calculate_percentage(num_orange_pix, total_pix):
+    """Return True, False or Ignore"""
+    # return "is_ignored"
+    return True
+
+
 def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_cropped_df):
 
+    print(temp_cropped_df)
     label_path = paths_image[1]
-    label_im = plt.imread(label_path)
+    # label_im = plt.imread(label_path)
+    label_im = np.array(Image.open(label_path).convert('RGB'))
 
     print(coordinates_x)
     print(coordinates_y)
@@ -122,23 +131,25 @@ def label_calculate(paths_image, img_array, coordinates_x, coordinates_y, temp_c
         crop_tl = label_im[int(top_right_arr[i][1]): int(bottom_left_arr[i][1]),
                            int(bottom_left_arr[i][0]): int(top_right_arr[i][0])]
 
-        # res = np.count_nonzero(np.all(crop_tl == ORANGE_PIXEL, axis=2))
-        # print(res)
-
-        # counter = 0
-        # for pixel in crop_tl:
-        #     # print(pixel)
-        #     if pixel == [0.98039216, 0.6666667,  0.11764706, 1.0]:
-        #         counter += 1
+        count_orange_pixels = np.count_nonzero(np.all(crop_tl == ORANGE_PIXEL, axis=2))
 
         diff_x = int(top_right_arr[i][0]) - int(bottom_left_arr[i][0])
         diff_y = int(bottom_left_arr[i][1]) - int(top_right_arr[i][1])
-        print(diff_x * diff_y)
-        # print(counter)
+        sum_pixel_crop = diff_x * diff_y
+
+        print(f"sum pix: {sum_pixel_crop}")
+        print(f"counter orange: {count_orange_pixels}")
+
+        res = calculate_percentage(count_orange_pixels, sum_pixel_crop)
+
+        if res == "is_ignored":
+            temp_cropped_df["is_ignored"].loc[temp_cropped_df['x0'] == top_right_arr[i][0]] = True
+        elif res:
+            temp_cropped_df["is_true"][temp_cropped_df['x0'] == top_right_arr[i][0]] = True
+
+        print(temp_cropped_df)
         plt.imshow(crop_tl)
         plt.show()
-
-
 
 
 def main():
