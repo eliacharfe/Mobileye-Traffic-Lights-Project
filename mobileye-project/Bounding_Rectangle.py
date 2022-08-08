@@ -156,49 +156,43 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
 
         if res == C.IS_IGNORE:
             temp_cropped_df.iat[i, C.INDEX_IGNORE] = True
-            # temp_cropped_df["is_ignore"].loc[temp_cropped_df['x0'] == top_right[0]] = True
         elif res:
             temp_cropped_df.iat[i, C.INDEX_TRUE] = True
-            # temp_cropped_df["is_true"].loc[temp_cropped_df['x0'] == top_right[0]] = True
         # plt.imshow(crop_tl)
         # plt.show()
 
 
-def crop_tf_from_image(image_name: str, image_path: str, image: np.array, temp_cropped_df: pd.DataFrame) -> None:
+def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.DataFrame) -> None:
 
-    cropped_image_path = os.path.join(re.sub('/[^/]+.png', '/', image_path), C.CROPPED)
-    if not os.path.exists(cropped_image_path):
-        os.mkdir(cropped_image_path)
+    if not os.path.exists(C.PATH_CROPPED):
+        os.mkdir(C.PATH_CROPPED)
 
-    cropped_image_path_true = cropped_image_path + C.DIRECTORY_TRUE
-    cropped_image_path_false = cropped_image_path + C.DIRECTORY_FALSE
-    cropped_image_path_ignore = cropped_image_path + C.DIRECTORY_IGNORE
+    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_TRUE):
+        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_TRUE)
+    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_FALSE):
+        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_FALSE)
+    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_IGNORE):
+        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_IGNORE)
 
     for index in temp_cropped_df.index:
         cropped_image = image[int(temp_cropped_df[C.Y0][index]):int(temp_cropped_df[C.Y1][index]),
-                        int(temp_cropped_df[C.X1][index]):int(temp_cropped_df[C.X0][index])]
+                              int(temp_cropped_df[C.X1][index]):int(temp_cropped_df[C.X0][index])]
 
-        directory = C.DIRECTORY_TRUE
         cropped_image_name = image_name.replace(C.EXTENSION_IMG, '') + '_' + temp_cropped_df[C.COL][index]
 
         if temp_cropped_df[C.IS_TRUE][index]:
             cropped_image_name += C.T
-            if not os.path.isdir(cropped_image_path_true):
-                os.mkdir(cropped_image_path_true)
+            directory = C.DIRECTORY_TRUE
         elif not temp_cropped_df[C.IS_IGNORE][index]:
             cropped_image_name += C.F
             directory = C.DIRECTORY_FALSE
-            if not os.path.isdir(cropped_image_path_false):
-                os.mkdir(cropped_image_path_false)
         else:
             cropped_image_name += C.I
             directory = C.DIRECTORY_IGNORE
-            if not os.path.isdir(cropped_image_path_ignore):
-                os.mkdir(cropped_image_path_ignore)
+
         cropped_image_name += '_' + str(temp_cropped_df[C.SEQ][index]).zfill(5) + C.PNG
         temp_cropped_df.at[index, C.PATH] = cropped_image_name
-
-        plt.imsave(cropped_image_path + directory + '/' + cropped_image_name, st.resize(cropped_image, (200, 100)))
+        plt.imsave(C.PATH_CROPPED + directory + '/' + cropped_image_name, st.resize(cropped_image, (200, 100)))
 
 
 def create_pandas_cropped_images():
@@ -224,7 +218,7 @@ def create_pandas_cropped_images():
 
         # print(temp_cropped_df)
 
-        crop_tf_from_image(image_name, path_dict[image_name][0], im, temp_cropped_df)
+        crop_tf_from_image(image_name, im, temp_cropped_df)
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
 
         # plt.imshow(im)

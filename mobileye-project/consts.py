@@ -13,10 +13,6 @@ INDEX_IGNORE = 2
 PATH_HEAD = "C:/leftImg8bit/train/"
 EXTENSION_LABEL = "_gtFine_color.png"
 
-DIRECTORY_TRUE = '/True_cropped'
-DIRECTORY_FALSE = '/False_cropped'
-DIRECTORY_IGNORE = '/Ignore_cropped'
-
 T = 'T'
 F = 'F'
 IGN = 'I'
@@ -61,7 +57,11 @@ IS_TRUE = 'is_true'
 IS_IGNORE = 'is_ignore'
 
 PNG = '.png'
-CROPPED = 'cropped'
+CROPPED = 'crop'
+PATH_CROPPED = 'C:/leftImg8bit/crop'
+DIRECTORY_TRUE = '/True'
+DIRECTORY_FALSE = '/False'
+DIRECTORY_IGNORE = '/Ignore'
 
 
 default_base_dir = r'C:\leftImg8bit'
