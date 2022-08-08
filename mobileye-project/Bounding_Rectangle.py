@@ -71,7 +71,7 @@ def get_rect(gray, pix_range, tf_x, tf_y, threshold, color, op):
                 size += i
                 break
 
-    if color == 'r':
+    if color == const.RED:
         top_right = (tf_x + size, tf_y - size if tf_y - size > 0 else 0)
         bottom_left = (tf_x - size if tf_x - size > 0 else 0, tf_y + 4 * size)
     else:
@@ -110,12 +110,18 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
     return rectangle_x, rectangle_y
 
 
-def calculate_percentage(num_orange_pix, total_pix):
+def connected_component(label_image, num_orange_pix, center_point):
+    pass
+
+
+def calculate_percentage(num_orange_pix, total_pix, label_image, center_point: tuple):
     """Return True, False or Ignore"""
     percentage = 100 * float(num_orange_pix)/float(total_pix)
     if percentage < 40:
         return False
     elif percentage >= 60:
+        if percentage >= 95:
+            return connected_component(label_image, num_orange_pix, center_point)
         return True
     return const.IS_IGNORE
 
@@ -146,7 +152,7 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
         diff_y = int(bottom_left_arr[i][1]) - int(top_right[1])
         sum_pixel_crop = diff_x * diff_y
 
-        res = calculate_percentage(count_orange_pixels, sum_pixel_crop)
+        res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1], (diff_x // 2, diff_y // 2))
 
         if res == const.IS_IGNORE:
             temp_cropped_df.iat[i, const.INDEX_IGNORE] = True
