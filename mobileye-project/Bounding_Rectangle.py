@@ -1,5 +1,7 @@
 from typing import List, Tuple
 
+from skimage import measure
+
 try:
     import os
     import re
@@ -38,7 +40,7 @@ def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.Data
     rectangle_y = np.array([], dtype='int64')
 
     for row in tf_details.iterrows():
-        tf_x, tf_y, tf_color, zoom = row[1][0:4]
+        tf_x, tf_y, tf_color, zoom = row[1][:4]
         if math.isnan(tf_x):
             continue
             # plt.plot(tf_x, tf_y, 'ro', color=tf_color, markersize=3)
@@ -121,13 +123,13 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
 
 def connected_component(label_image, num_orange_pix, colored_point):
     """
-    The function checks for rectangles of 95%+ match if they cover the tf or not.
-    :param label_image: the path of label image.
-    :param num_orange_pix: number of orange pixels in the rectangle.
-    :param colored_point: the point (g/r) from the Attention part: 100% on orange pixel.
-    :return: True - num of rectangle pixels is 60%+ of all pixels in the component.
-             Ignore - num of rectangle pixels is between 40-60% of all pixels in the component.
-             False - num of rectangle pixels is below 40% of all puxels in the component.
+    Check for rectangles of 95%+ match if they cover the tf or not.
+    :param label_image: The path of label image.
+    :param num_orange_pix: The number of orange pixels in the rectangle.
+    :param colored_point: The point (g/r) from the Attention part: 100% on orange pixel.
+    :return: True - Number of rectangle pixels is 60%+ of all pixels in the component.
+             Ignore - Number of rectangle pixels is between 40-60% of all pixels in the component.
+             False - Number of rectangle pixels is below 40% of all pixels in the component.
     """
     comp_image = np.array(Image.open(label_image).convert('L'))
 
@@ -153,7 +155,7 @@ def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, 
     :param total_pix: Total pixels in the cropped image.
     :param label_image: Path to the label image.
     :param colored_point: The point from the Attention part.
-    :return: True/False or the string: "is_ignore"
+    :return: True/False or the string: "is_ignore".
     """
     percentage = 100 * float(num_orange_pix)/float(total_pix)
     if percentage < 40:
@@ -166,7 +168,7 @@ def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, 
 
 
 def get_top_rights_bottom_lefts(coordinates_x: List[float],
-                                coordinates_y: List[float]) -> Tuple[List[float], List[float]]:
+                                coordinates_y: List[float]) -> [List[float], List[float]]:
     """
     Get a list of all x coordinates and a list of all y coordinates representing top right point and
     bottom left point respectively, and return 2 list which 1 contains all top right points and the
@@ -232,7 +234,6 @@ def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.Dat
     :param image: The array of the image as pixels.
     :param temp_cropped_df: Temporary dataframe to contacted later in the main dataframe
     """
-
     if not os.path.exists(C.PATH_CROPPED):
         os.mkdir(C.PATH_CROPPED)
 
@@ -312,6 +313,10 @@ def create_pandas_cropped_images():
 def main():
     cropped_df = create_pandas_cropped_images()
     print(cropped_df)
+
+    path_to_h5 = C.BASE_DIR + '/' + C.attention_results
+    os.mkdir(path_to_h5)
+    cropped_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')
 
 
 if __name__ == '__main__':

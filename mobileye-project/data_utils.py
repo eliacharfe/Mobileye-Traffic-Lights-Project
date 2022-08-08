@@ -52,6 +52,7 @@ class TrafficLightDataSet(Dataset):
 
         # attention_h5_path = os.path.join(base_dir, C.attention_results, C.attention_results_h5)
         attention_h5_path = os.path.join(base_dir, C.attention_results_h5)
+
         crop_data = pd.read_hdf(crops_h5_path)  # type: pd.DataFrame
         self.attn_data = pd.read_hdf(attention_h5_path)  # type: pd.DataFrame  # To trace back using original picture
         self.attn_data[C.SEQ] = np.arange(len(self.attn_data))

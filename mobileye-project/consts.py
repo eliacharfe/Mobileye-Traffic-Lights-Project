@@ -57,8 +57,8 @@ IS_TRUE = 'is_true'
 IS_IGNORE = 'is_ignore'
 
 PNG = '.png'
-CROPPED = 'crop'
-PATH_CROPPED = 'C:/leftImg8bit/crop'
+CROPPED = 'crops'
+PATH_CROPPED = 'C:/leftImg8bit/crops'
 DIRECTORY_TRUE = '/True'
 DIRECTORY_FALSE = '/False'
 DIRECTORY_IGNORE = '/Ignore'
@@ -67,11 +67,13 @@ DIRECTORY_IGNORE = '/Ignore'
 default_base_dir = r'C:\leftImg8bit'
 attention_results = 'attention_results'
 # crops_dir = os.path.join(attention_results, 'crop')
-crops_dir = os.path.join('crop')
+crops_dir = os.path.join('crops')
 attention_results_h5 = 'attention_results.h5'
 crop_results_h5 = 'crop_results.h5'
 models_output_dir = 'logs_and_models'
 logs_dir = 'logs'
+
+BASE_DIR = 'C:/leftImg8bit'
 
 DIR_TRUE = 'True'
 DIR_FALSE = 'False'
