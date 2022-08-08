@@ -1,5 +1,6 @@
 try:
     import os
+    import re
     import json
     import glob
     import argparse
@@ -15,6 +16,7 @@ try:
     import cv2
     import data
     from skimage.feature import peak_local_max
+    import skimage.transform as st
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -161,17 +163,40 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
         # plt.show()
 
 
+def crop_tf_from_image(image_name: str, image_path: str, image: np.array, temp_cropped_df: pd.DataFrame) -> None:
+
+    cropped_image_path = os.path.join(re.sub('/[^/]+.png', '/', image_path), "cropped")
+    if not os.path.exists(cropped_image_path):
+        os.mkdir(cropped_image_path)
+
+    for index in temp_cropped_df.index:
+        cropped_image = image[int(temp_cropped_df['y0'][index]):int(temp_cropped_df['y1'][index]),
+                              int(temp_cropped_df['x1'][index]):int(temp_cropped_df['x0'][index])]
+
+        cropped_image_name = image_name.replace('_leftImg8bit.png', '') + '_' + temp_cropped_df['col'][index]
+        if temp_cropped_df['is_true'][index]:
+            cropped_image_name += 'T'
+        elif not temp_cropped_df['is_ignore'][index]:
+            cropped_image_name += 'F'
+        else:
+            cropped_image_name += 'I'
+        cropped_image_name += '_' + str(temp_cropped_df['seq'][index]).zfill(5) + '.png'
+        temp_cropped_df.at[index, 'path'] = cropped_image_name
+
+        plt.imsave(cropped_image_path + '/' + cropped_image_name, st.resize(cropped_image, (200, 100)))
+
+
 def create_pandas_cropped_images():
     df = data.create_data_frame('attention_results.h5')
     path_dict = data.create_data()
-    cropped_df = pd.DataFrame(columns=['seq', 'is_true', 'is_ignored', 'path', 'x0', 'x1', 'y0', 'y1', 'color'])
+    cropped_df = pd.DataFrame(columns=['seq', 'is_true', 'is_ignore', 'path', 'x0', 'x1', 'y0', 'y1', 'col'])
     #  cropped_df.loc[len(cropped_df.index)] = [0, False, False,'', 52, 12, 43, 23, 'r']
 
     # image_tf_details - panda contains the images : all traffic lights x, y, color and zoom
     for image_name in path_dict.keys():
         im = plt.imread(path_dict[image_name][0])
         temp_cropped_df = pd.DataFrame(
-            columns=['seq', 'is_true', 'is_ignored', 'path', 'x0', 'x1', 'y0', 'y1', 'color'])
+            columns=['seq', 'is_true', 'is_ignore', 'path', 'x0', 'x1', 'y0', 'y1', 'col'])
 
         # image_tf_details = df.loc[df['path'] == image_name][['x', 'y', 'col', 'zoom']]
         # tf_coordinates_x1, tf_coordinates_y1 = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
@@ -179,7 +204,8 @@ def create_pandas_cropped_images():
 
         image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
         tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
-        label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
+        # label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
+        crop_tf_from_image(image_name, path_dict[image_name][0], im, temp_cropped_df)
         print(temp_cropped_df)
 
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
