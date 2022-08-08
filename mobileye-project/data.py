@@ -1,3 +1,5 @@
+from typing import Dict, Tuple
+
 try:
     import os
     import json
@@ -19,12 +21,23 @@ except ImportError:
     raise
 
 
-def create_data_frame(df_path):
+def create_data_frame(df_path: str):
+    """
+    Get a path to the dataframe and return the dataframe.
+    :param df_path: A path to the dataframe.
+    :return: The dataframe.
+    """
     pd.set_option('display.max_columns', None, 'display.max_rows', None)
     return pd.read_hdf(df_path)
 
 
-def create_data_structure_images_names_paths(df):
+def create_data_structure_images_names_paths(df: pd.DataFrame) -> Dict[str, Tuple[str, str]]:
+    """
+    Get a DataFrame and create a dictionary which the key is name of the image according to the df
+    and the value is a tuple of the full path image and the full path to the label image.
+    :param df:
+    :return: Dictionary
+    """
     dictionary_name_image_paths = {}
     for image_name in df[C.PATH]:
         if image_name not in dictionary_name_image_paths.keys():
@@ -37,11 +50,16 @@ def create_data_structure_images_names_paths(df):
     return dictionary_name_image_paths
 
 
-def get_values_by_name_key(image_name: str, dictionary: dict):
+def get_values_by_name_key(image_name: str, dictionary: dict) -> Tuple[str, str]:
     return dictionary[image_name]
 
 
-def create_data():
+def create_data() -> Dict[str, Tuple[str, str]]:
+    """
+    Create a dictionary which the key is name of the image (taken from the df) and the value is a tuple
+    of the full path image and the full path to the label image.
+    :return: Dictionary
+    """
     df = create_data_frame(C.attention_results_h5)
     my_dict = create_data_structure_images_names_paths(df)
     return my_dict

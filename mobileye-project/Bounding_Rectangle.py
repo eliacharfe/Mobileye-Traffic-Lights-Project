@@ -1,3 +1,5 @@
+from typing import List, Tuple
+
 try:
     import os
     import re
@@ -23,7 +25,14 @@ except ImportError:
     raise
 
 
-def create_bounding_rectangle(image, tf_details, temp_cropped_df):
+def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.DataFrame) -> Tuple[List[float], List[float]]:
+    """
+    Create 2 lists of coordinates according to the zoom, the coordinates and the color that appear in
+    "tf_details" dataframe and save those in the temporary df sent, then returns the lists.
+    :param tf_details: DataFrame.
+    :param temp_cropped_df: DataFrame.
+    :return: Tuple of lists.
+    """
     seq = 0
     rectangle_x = np.array([], dtype='int64')
     rectangle_y = np.array([], dtype='int64')
@@ -114,8 +123,16 @@ def connected_component(label_image, num_orange_pix, center_point):
     pass
 
 
-def calculate_percentage(num_orange_pix, total_pix, label_image, center_point: tuple):
-    """Return True, False or Ignore"""
+def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, center_point: tuple):
+    """
+    Calculate percentage of orange pixels according the total pixels in the cropped image then after some
+    checks return True/False/Ignore telling if there a TL.
+    :param num_orange_pix: The number of orange pixels in the cropped image.
+    :param total_pix: Total pixels in the cropped image.
+    :param label_image: Path to the label image.
+    :param center_point: The center point of the cropped image.
+    :return: True/False or the string: "is_ignore"
+    """
     percentage = 100 * float(num_orange_pix)/float(total_pix)
     if percentage < 40:
         return False
@@ -126,7 +143,16 @@ def calculate_percentage(num_orange_pix, total_pix, label_image, center_point: t
     return C.IS_IGNORE
 
 
-def get_top_rights_bottom_lefts(coordinates_x, coordinates_y):
+def get_top_rights_bottom_lefts(coordinates_x: List[float],
+                                coordinates_y: List[float]) -> Tuple[List[float], List[float]]:
+    """
+    Get a list of all x coordinates and a list of all y coordinates representing top right point and
+    bottom left point respectively, and return 2 list which 1 contains all top right points and the
+    other contains all bottom left points.
+    :param coordinates_x: List of all x coordinates.
+    :param coordinates_y: List of all x coordinates.
+    :return: List of top right points and list of bottom left points.
+    """
     top_right_arr = []
     bottom_left_arr = []
     for i in range(len(coordinates_x)):
@@ -138,7 +164,18 @@ def get_top_rights_bottom_lefts(coordinates_x, coordinates_y):
     return top_right_arr, bottom_left_arr
 
 
-def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
+def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y: List[float],
+                    temp_cropped_df: pd.DataFrame) -> None:
+    """
+    Get a tuple of the path to the image and the path to its label image, a list of all x coordinates,
+    a list of all y coordinates representing top right point and bottom left point respectively,
+    and a temporary dataframe to change values in "is_true" column and in "is_ignore" column after
+    comparing to the label image.
+    :param paths_image: Tuple of the path to the image and the path to its label image.
+    :param coordinates_x: List of all x coordinates.
+    :param coordinates_y: List of all y coordinates.
+    :param temp_cropped_df: Temporary dataframe.
+    """
     label_im = np.array(Image.open(paths_image[1]).convert('RGB'))
     top_right_arr, bottom_left_arr = get_top_rights_bottom_lefts(coordinates_x, coordinates_y)
 
@@ -163,6 +200,15 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
 
 
 def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.DataFrame) -> None:
+    """
+    Get an image, its path and a data frame to add the saved cropped image name (path) to the df.
+    Crop the rectangle according to the x0,y0 (top right) and x1,y1 (bottom left) that are in the df
+    and save the images in "..../crop/True" or  "..../crop/False" or  "..../crop/Ignore" directory
+    according to the df, and save the path accordingly.
+    :param image_name: The name of the image.
+    :param image: The array of the image as pixels.
+    :param temp_cropped_df: Temporary dataframe to contacted later in the main dataframe
+    """
 
     if not os.path.exists(C.PATH_CROPPED):
         os.mkdir(C.PATH_CROPPED)
@@ -196,6 +242,22 @@ def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.Dat
 
 
 def create_pandas_cropped_images():
+    """
+    Create a dataframe Pandas where each row represent a cropped rectangle image of suspicious TL point
+    as below:
+        seq  is_true  is_ignore        path                          x0         x1        y0       y1     col(or)
+    0    0   False     False   aachen_000001_000019_rF_00000.png   571.000     549.0     404.5   462.0000   r
+    1    1   False     False   aachen_000001_000019_rF_00001.png   572.500     539.5    388.75   475.0000   r
+    2    0   False     True    aachen_000004_000019_gi_00000.png   249.000     227.0     366.0   423.5000   g
+    3    1   False     False   aachen_000004_000019_gF_00001.png  2011.250   1972.75     200.5   301.1250   g
+    4    0   True      False   aachen_000010_000019_rT_00000.png  1664.500    1631.5    108.75   195.0000   r
+    5    1   False     False   aachen_000010_000019_rF_00001.png  1411.000    1389.0     356.5   414.0000   r
+    6    2   False     False   aachen_000010_000019_rF_00002.png   539.000     517.0     360.5   418.0000   r
+    .    .     .         .            .           .         .         .      .
+    .    .     .         .            .           .         .         .      .
+    .    .     .         .            .           .         .         .      .
+    :return: DataFrame
+    """
     df = data.create_data_frame(C.attention_results_h5)
     path_dict = data.create_data()
     cropped_df = pd.DataFrame(columns=[C.SEQ, C.IS_TRUE, C.IS_IGNORE, C.PATH, C.X0, C.X1,
@@ -205,18 +267,15 @@ def create_pandas_cropped_images():
     for image_name in path_dict.keys():
         im = plt.imread(path_dict[image_name][0])
         temp_cropped_df = pd.DataFrame(
-            columns=[C.SEQ, C.IS_TRUE, C.IS_IGNORE, C.PATH, C.X0, C.X1, C.Y0,
-                     C.Y1, C.COL])
+            columns=[C.SEQ, C.IS_TRUE, C.IS_IGNORE, C.PATH, C.X0, C.X1, C.Y0, C.Y1, C.COL])
 
         image_tf_details = df.loc[df[C.PATH] == image_name][[C.X, C.Y, C.COL, C.ZOOM]]
-        tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
+        tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(image_tf_details, temp_cropped_df)
         label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
         # image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
         # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
         # label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
-
-        # print(temp_cropped_df)
 
         crop_tf_from_image(image_name, im, temp_cropped_df)
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
@@ -224,7 +283,6 @@ def create_pandas_cropped_images():
         # plt.imshow(im)
         # plt.plot(tf_coordinates_x, tf_coordinates_y, 'mx', color='y', markersize=3)
         # plt.show()
-
     return cropped_df
 
 

@@ -67,11 +67,15 @@ DIRECTORY_IGNORE = '/Ignore'
 default_base_dir = r'C:\leftImg8bit'
 attention_results = 'attention_results'
 # crops_dir = os.path.join(attention_results, 'crop')
-crops_dir = os.path.join('cropped')
+crops_dir = os.path.join('crop')
 attention_results_h5 = 'attention_results.h5'
 crop_results_h5 = 'crop_results.h5'
 models_output_dir = 'logs_and_models'
 logs_dir = 'logs'
+
+DIR_TRUE = 'True'
+DIR_FALSE = 'False'
+DIR_IGNORE = 'Ignore'
 
 EXTENSION_IMG = '_leftImg8bit.png'
 

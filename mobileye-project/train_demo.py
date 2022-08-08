@@ -212,13 +212,16 @@ def examine_my_results(base_dir,
 
 
 def main():
-    base_dir = r'C:\leftImg8bit'
-    full_images_dir = r'C:\leftImg8bit\train'
-    model_name = 'my_model_final_2'
-    train_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=True)
-    test_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=False)
-    trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=3)
-    examine_my_results(base_dir, full_images_dir, trained_model_path, test_dataset)
+    try:
+        base_dir = r'C:\leftImg8bit'
+        full_images_dir = r'C:\leftImg8bit\train'
+        model_name = 'my_model_final_2'
+        train_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=True)
+        test_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=False)
+        trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=3)
+        examine_my_results(base_dir, full_images_dir, trained_model_path, test_dataset)
+    except Exception as e:
+        print(e)
 
 
 if __name__ == '__main__':
