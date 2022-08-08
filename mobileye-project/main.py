@@ -21,68 +21,6 @@ except ImportError:
     raise
 
 
-# kernel = np.array([[-0.04, -0.04, -0.04, -0.04, -0.04],
-#                    [-0.04, 0.04,  0.04, 0.04, -0.04],
-#                    [-0.04,  0.04,  0.04, 0.04, -0.04],
-#                    [-0.04,  0.04,  0.04,  0.04, -0.04],
-#                    [-0.04, -0.04, -0.04, -0.04, -0.04]])
-#
-#
-# kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64],
-#                    [-0.64, 1.1377777777,  1.1377777777, 1.1377777777, -0.64],
-#                    [-0.64,  1.1377777777,  1.1377777777, 1.1377777777, -0.64],
-#                    [-0.64,  1.1377777777,  1.1377777777,  1.1377777777, -0.64],
-#                    [-0.64, -0.64, -0.64, -0.64, -0.64]])
-
-#
-# kernel = np.array([[0.04, 0.04, 0.04, 0.04, 0.04],
-#                    [0.04, -0.04,  -0.04, -0.04, 0.04],
-#                    [0.04,  -0.04,  -0.04, -0.04, 0.04],
-#                    [0.04,  -0.04,  -0.04,  -0.04,  0.04],
-#                    [0.04, 0.04, 0.04, 0.04, 0.04]])
-#
-#
-# kernel = np.array([[0.64, 0.64, 0.64, 0.64, 0.64],
-#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
-#                    [0.64,  -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
-#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
-#                    [0.64, 0.64, 0.64, 0.64, 0.64]])
-
-
-# BLACK = -0.4
-# GRAY = -0.1
-# WHITE = 0.39183
-#
-# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
-#                    [BLACK, GRAY,  GRAY, GRAY,   GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]
-#                    ])
-#
-
-# BLACK = -0.54
-# WHITE = 0.26666666667
-# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
-#                    [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
-#                    ])
-
-
 def convolve_red(image:  const.NDArray, h: float, red_filter:  const.NDArray) -> List[Tuple]:
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filter_lee = red_filter
@@ -206,7 +144,7 @@ def main(argv=None):
     flist = glob.glob(os.path.join(args.dir, '*_leftImg8bit.png'))
 
     for image in flist:
-        json_fn = image.replace('_leftImg8bit.png', '_gtFine_polygons.json')
+        json_fn = image.replace(const.EXTENSION_IMG, '_gtFine_polygons.json')
         if not os.path.exists(json_fn):
             json_fn = None
         test_find_tfl_lights(image, json_fn)
@@ -224,4 +162,64 @@ if __name__ == '__main__':
 
 
 
+# kernel = np.array([[-0.04, -0.04, -0.04, -0.04, -0.04],
+#                    [-0.04, 0.04,  0.04, 0.04, -0.04],
+#                    [-0.04,  0.04,  0.04, 0.04, -0.04],
+#                    [-0.04,  0.04,  0.04,  0.04, -0.04],
+#                    [-0.04, -0.04, -0.04, -0.04, -0.04]])
+#
+#
+# kernel = np.array([[-0.64, -0.64, -0.64, -0.64, -0.64],
+#                    [-0.64, 1.1377777777,  1.1377777777, 1.1377777777, -0.64],
+#                    [-0.64,  1.1377777777,  1.1377777777, 1.1377777777, -0.64],
+#                    [-0.64,  1.1377777777,  1.1377777777,  1.1377777777, -0.64],
+#                    [-0.64, -0.64, -0.64, -0.64, -0.64]])
+
+#
+# kernel = np.array([[0.04, 0.04, 0.04, 0.04, 0.04],
+#                    [0.04, -0.04,  -0.04, -0.04, 0.04],
+#                    [0.04,  -0.04,  -0.04, -0.04, 0.04],
+#                    [0.04,  -0.04,  -0.04,  -0.04,  0.04],
+#                    [0.04, 0.04, 0.04, 0.04, 0.04]])
+#
+#
+# kernel = np.array([[0.64, 0.64, 0.64, 0.64, 0.64],
+#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
+#                    [0.64,  -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
+#                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
+#                    [0.64, 0.64, 0.64, 0.64, 0.64]])
+
+
+# BLACK = -0.4
+# GRAY = -0.1
+# WHITE = 0.39183
+#
+# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+#                    [BLACK, GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, GRAY,   BLACK],
+#                    [BLACK, GRAY,  GRAY, GRAY,   GRAY,  GRAY,  GRAY,  GRAY,  GRAY, GRAY,   BLACK],
+#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]
+#                    ])
+#
+
+# BLACK = -0.54
+# WHITE = 0.26666666667
+# kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+#                    [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,  BLACK],
+#                    [BLACK, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
+#                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
+#                    ])
 

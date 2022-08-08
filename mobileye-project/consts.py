@@ -13,6 +13,14 @@ INDEX_IGNORE = 2
 PATH_HEAD = "C:/leftImg8bit/train/"
 EXTENSION_LABEL = "_gtFine_color.png"
 
+DIRECTORY_TRUE = '/True_cropped'
+DIRECTORY_FALSE = '/False_cropped'
+DIRECTORY_IGNORE = '/Ignore_cropped'
+
+T = 'T'
+F = 'F'
+IGN = 'I'
+
 threshold = 100
 CROPPED_PERCENT = 0.6
 
@@ -52,6 +60,9 @@ BATCH = 'batch'
 IS_TRUE = 'is_true'
 IS_IGNORE = 'is_ignore'
 
+PNG = '.png'
+CROPPED = 'cropped'
+
 
 default_base_dir = '../../data/v1'
 attention_results = 'attention_results'
@@ -60,6 +71,8 @@ attention_results_h5 = 'attention_results.h5'
 crop_results_h5 = 'crop_results.h5'
 models_output_dir = 'logs_and_models'
 logs_dir = 'logs'
+
+EXTENSION_IMG = '_leftImg8bit.png'
 
 # Crop size:
 default_crop_w = 32
