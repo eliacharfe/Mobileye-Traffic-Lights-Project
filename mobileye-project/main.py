@@ -1,7 +1,5 @@
 from typing import Tuple, List
 
-from numpy.typing import NDArray
-
 try:
     import os
     import json
@@ -17,6 +15,7 @@ try:
     import cv2
     from skimage.feature import peak_local_max
     import re
+    import consts as const
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -48,19 +47,6 @@ except ImportError:
 #                    [0.64,  -0.026666666666,  -0.026666666666, -0.026666666666, 0.64],
 #                    [0.64, -0.026666666666,  -0.026666666666, -0.026666666666,  0.64],
 #                    [0.64, 0.64, 0.64, 0.64, 0.64]])
-
-BLACK = -0.52
-WHITE = 0.48
-kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK],
-                   [BLACK, BLACK, BLACK,  WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK],
-                   [BLACK, BLACK, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, WHITE, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, BLACK],
-                   [BLACK, BLACK, WHITE,  WHITE, WHITE, WHITE, WHITE, WHITE, BLACK, BLACK],
-                   [BLACK, BLACK, BLACK,  WHITE, WHITE, WHITE, WHITE, BLACK, BLACK, BLACK],
-                   [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK]])
 
 
 # BLACK = -0.4
@@ -96,16 +82,13 @@ kernel = np.array([[BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLAC
 #                    [BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,  BLACK]
 #                    ])
 
-threshold = 100
-CROPPED_PERCENT = 0.6
 
-
-def convolve_red(image: NDArray, h: float, red_filter: NDArray) -> List[Tuple]:
+def convolve_red(image:  const.NDArray, h: float, red_filter:  const.NDArray) -> List[Tuple]:
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filter_lee = red_filter
     red_filtered_image = image[:, :, 0]
     plt.subplot(2, 2, 2, sharex=h, sharey=h)
-    red_conv = sg.convolve2d(red_filtered_image, kernel)
+    red_conv = sg.convolve2d(red_filtered_image, const.kernel)
     plt.imshow(red_conv)
     #plt.imshow(red_conv > 6)
     plt.title("Convolved red")
@@ -122,10 +105,10 @@ def convolve_red(image: NDArray, h: float, red_filter: NDArray) -> List[Tuple]:
     return coordinates
 
 
-def convolve_green(image: NDArray, h: float):
+def convolve_green(image, h: float):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
-    green_conv = sg.convolve2d(green_filtered_image, kernel)
+    green_conv = sg.convolve2d(green_filtered_image,  const.kernel)
     plt.imshow(green_conv)
     #plt.imshow(green_conv > 6)
     plt.title("Convolved green")
@@ -136,13 +119,13 @@ def convolve_green(image: NDArray, h: float):
     return coordinates
 
 
-def red_filter(image_path: str) -> NDArray:
+def red_filter(image_path: str) ->  const.NDArray:
     # lower mask (0-10)
 
     image = np.array(Image.open(image_path))
-    image = image[:int(image.shape[0] * CROPPED_PERCENT), :]
+    image = image[:int(image.shape[0] *  const.CROPPED_PERCENT), :]
     img = cv2.imread(image_path)
-    img = img[:int(img.shape[0] * CROPPED_PERCENT), :]
+    img = img[:int(img.shape[0] *  const.CROPPED_PERCENT), :]
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 50, 50])
@@ -164,7 +147,7 @@ def red_filter(image_path: str) -> NDArray:
     return image_max_2d
 
 
-def find_tfl_lights(image: NDArray, *args: any) -> Tuple[List[float]]:
+def find_tfl_lights(image:  const.NDArray, *args: any) -> Tuple[List[float]]:
     """
     Detect candidates for TFL lights. Use image, kwargs
     :param image: The image itself as np.uint8, shape of (H, W, 3)
@@ -191,7 +174,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple) -> None:
 
     if not objects:
         image = np.array(plt.imread(image_path))
-        cropped_image = image[:int(image.shape[0] * CROPPED_PERCENT), :]
+        cropped_image = image[:int(image.shape[0] *  const.CROPPED_PERCENT), :]
 
         red_filter_2d = red_filter(image_path)
         h = plt.subplot(2, 2, 1)
@@ -201,7 +184,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple) -> None:
         plt.imshow(cropped_image)
         plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
         plt.plot(red_x, red_y, 'ro', color='r', markersize=3)
-        plt.title(f"black = {BLACK}, white = {WHITE}")
+        plt.title(f"black = { const.BLACK}, white = { const.WHITE}")
         plt.show()
 
 
