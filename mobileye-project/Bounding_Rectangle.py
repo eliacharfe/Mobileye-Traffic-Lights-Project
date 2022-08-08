@@ -119,18 +119,40 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
     return rectangle_x, rectangle_y
 
 
-def connected_component(label_image, num_orange_pix, center_point):
-    pass
+def connected_component(label_image, num_orange_pix, colored_point):
+    """
+    The function checks for rectangles of 95%+ match if they cover the tf or not.
+    :param label_image: the path of label image.
+    :param num_orange_pix: number of orange pixels in the rectangle.
+    :param colored_point: the point (g/r) from the Attention part: 100% on orange pixel.
+    :return: True - num of rectangle pixels is 60%+ of all pixels in the component.
+             Ignore - num of rectangle pixels is between 40-60% of all pixels in the component.
+             False - num of rectangle pixels is below 40% of all puxels in the component.
+    """
+    comp_image = np.array(Image.open(label_image).convert('L'))
+
+    all_labels = measure.label(comp_image)
+    blobs_labels = measure.label(comp_image, background=0)
+
+    comp_id = all_labels[int(colored_point[1])][int(colored_point[0])]
+    total_orange_pix = np.count_nonzero(all_labels == comp_id)
+
+    if (num_orange_pix/total_orange_pix)*100 >= 60:
+        return True
+    elif ((num_orange_pix/total_orange_pix)*100 >= 40) and ((num_orange_pix/total_orange_pix)*100 < 60):
+        return C.IS_IGNORE
+    else:
+        return False
 
 
-def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, center_point: tuple):
+def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, colored_point: tuple):
     """
     Calculate percentage of orange pixels according the total pixels in the cropped image then after some
     checks return True/False/Ignore telling if there a TL.
     :param num_orange_pix: The number of orange pixels in the cropped image.
     :param total_pix: Total pixels in the cropped image.
     :param label_image: Path to the label image.
-    :param center_point: The center point of the cropped image.
+    :param colored_point: The point from the Attention part.
     :return: True/False or the string: "is_ignore"
     """
     percentage = 100 * float(num_orange_pix)/float(total_pix)
@@ -138,7 +160,7 @@ def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, 
         return False
     elif percentage >= 60:
         if percentage >= 95:
-            return connected_component(label_image, num_orange_pix, center_point)
+            return connected_component(label_image, num_orange_pix, colored_point)
         return True
     return C.IS_IGNORE
 
@@ -165,7 +187,7 @@ def get_top_rights_bottom_lefts(coordinates_x: List[float],
 
 
 def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y: List[float],
-                    temp_cropped_df: pd.DataFrame) -> None:
+                    temp_cropped_df: pd.DataFrame, image_tf_details) -> None:
     """
     Get a tuple of the path to the image and the path to its label image, a list of all x coordinates,
     a list of all y coordinates representing top right point and bottom left point respectively,
@@ -189,7 +211,8 @@ def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y:
         diff_y = int(bottom_left_arr[i][1]) - int(top_right[1])
         sum_pixel_crop = diff_x * diff_y
 
-        res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1], (diff_x // 2, diff_y // 2))
+        res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1],
+                                   (image_tf_details['x'][i], image_tf_details['y'][i]))
 
         if res == C.IS_IGNORE:
             temp_cropped_df.iat[i, C.INDEX_IGNORE] = True
@@ -271,7 +294,7 @@ def create_pandas_cropped_images():
 
         image_tf_details = df.loc[df[C.PATH] == image_name][[C.X, C.Y, C.COL, C.ZOOM]]
         tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(image_tf_details, temp_cropped_df)
-        label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
+        label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df, image_tf_details)
 
         # image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
         # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
