@@ -313,10 +313,17 @@ def create_pandas_cropped_images():
 def main():
     cropped_df = create_pandas_cropped_images()
     print(cropped_df)
+    attention_df = data.create_data_frame(C.attention_results_h5)
 
     path_to_h5 = C.BASE_DIR + '/' + C.attention_results
-    os.mkdir(path_to_h5)
-    cropped_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')
+
+    if not os.path.exists(path_to_h5):
+        os.mkdir(path_to_h5)
+
+    cropped_df.to_hdf(path_to_h5 + '/' + C.crop_results_h5, key='df', mode='w')
+    attention_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')
+
+
 
 
 if __name__ == '__main__':
