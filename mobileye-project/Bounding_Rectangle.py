@@ -11,29 +11,19 @@ try:
     from scipy.ndimage import maximum_filter
     from PIL import Image
     import matplotlib.pyplot as plt
-    # for rectangle draw:
     import matplotlib.patches as patches
     import cv2
     import data
     from skimage.feature import peak_local_max
     import skimage.transform as st
+    import math
 except ImportError:
     print("Need to fix the installation")
     raise
 
-
-# def dataFrame_to_csv(df):
-#     base_path = 'C:\\leftImg8bit_trainvaltest\\leftImg8bit\\train\\'
-#     new_df = pd.DataFrame(columns=['index', 'path'])
-#     for i in range(len(df.index)):
-#         cur_path = base_path + df.loc[i]['path'].split('_')[0] + '\\' +
-
 X_AXIS = 22
 Y_AXIS = 15
 HEIGHT = 115
-
-# ORANGE_PIXEL = [0.98, 0.667, 0.118]
-# ORANGE_PIXEL = [0.98039216, 0.6666667, 0.11764706]
 ORANGE_PIXEL = [250, 170, 30]
 
 
@@ -44,11 +34,12 @@ def create_bounding_rectangle(image, tf_details, temp_cropped_df):
 
     for row in tf_details.iterrows():
         tf_x, tf_y, tf_color, zoom = row[1][0:4]
-        plt.plot(tf_x, tf_y, 'ro', color=tf_color, markersize=3)
+        if math.isnan(tf_x):
+            continue
+            # plt.plot(tf_x, tf_y, 'ro', color=tf_color, markersize=3)
         if tf_color == 'r':
             top_right = (tf_x + X_AXIS*(1-zoom), tf_y - Y_AXIS*(1-zoom))
             bottom_left = (tf_x - X_AXIS*(1-zoom), tf_y + (HEIGHT - Y_AXIS)*(1-zoom))
-
         else:
             top_right = (tf_x + X_AXIS*(1-zoom), tf_y - (HEIGHT - Y_AXIS)*(1-zoom))
             bottom_left = (tf_x - X_AXIS*(1-zoom), tf_y + Y_AXIS*(1-zoom))
@@ -94,14 +85,14 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
     for row in tf_axis_and_color.iterrows():
         tf_x, tf_y, color = row[1][:3]
 
-        plt.plot(tf_x, tf_y, 'ro', color=color, markersize=3)
+        # plt.plot(tf_x, tf_y, 'ro', color=color, markersize=3)
         if color == 'r':
             top_right, bottom_left, size = get_rect(gray, 25, tf_x, tf_y, 0.300, color, '+')
         else:  # green color
             top_right, bottom_left, size = get_rect(gray, 50, tf_x, tf_y, 0.250, color, '-')
 
         if size == -1 or size < 3:
-            top_right = (tf_x + 5,tf_y - 2*5 if tf_y - 2*5 > 0 else 0)
+            top_right = (tf_x + 5, tf_y - 2*5 if tf_y - 2*5 > 0 else 0)
             bottom_left = (tf_x - 5 if tf_x - 5 > 0 else 0, tf_y + 5)
 
         rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
@@ -117,12 +108,11 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
 def calculate_percentage(num_orange_pix, total_pix):
     """Return True, False or Ignore"""
     percentage = 100 * float(num_orange_pix)/float(total_pix)
-    # print(f"percent: {percentage}")
     if percentage < 40:
         return False
     elif percentage >= 60:
         return True
-    return "is_ignored"
+    return "is_ignore"
 
 
 def get_top_rights_bottom_lefts(coordinates_x, coordinates_y):
@@ -154,8 +144,8 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
 
         res = calculate_percentage(count_orange_pixels, sum_pixel_crop)
 
-        if res == "is_ignored":
-            temp_cropped_df["is_ignored"].loc[temp_cropped_df['x0'] == top_right[0]] = True
+        if res == "is_ignore":
+            temp_cropped_df["is_ignore"].loc[temp_cropped_df['x0'] == top_right[0]] = True
         elif res:
             temp_cropped_df["is_true"][temp_cropped_df['x0'] == top_right[0]] = True
 
@@ -198,28 +188,25 @@ def create_pandas_cropped_images():
         temp_cropped_df = pd.DataFrame(
             columns=['seq', 'is_true', 'is_ignore', 'path', 'x0', 'x1', 'y0', 'y1', 'col'])
 
-        # image_tf_details = df.loc[df['path'] == image_name][['x', 'y', 'col', 'zoom']]
-        # tf_coordinates_x1, tf_coordinates_y1 = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
-        # label_calculate(path_dict[image_name], tf_coordinates_x1, tf_coordinates_y1, temp_cropped_df)
+        image_tf_details = df.loc[df['path'] == image_name][['x', 'y', 'col', 'zoom']]
+        tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
+        label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
-        image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
-        tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
-        # label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
-        crop_tf_from_image(image_name, path_dict[image_name][0], im, temp_cropped_df)
-        print(temp_cropped_df)
+        # crop_tf_from_image(image_name, path_dict[image_name][0], im, temp_cropped_df)
 
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
 
-        plt.imshow(im)
+        # plt.imshow(im)
         # plt.plot(tf_coordinates_x1, tf_coordinates_y1, 'mx', color='m', markersize=3)
-        plt.plot(tf_coordinates_x, tf_coordinates_y, 'mx', color='y', markersize=3)
-        plt.show()
+        # plt.plot(tf_coordinates_x, tf_coordinates_y, 'mx', color='y', markersize=3)
+        # plt.show()
 
     return cropped_df
 
 
 def main():
     cropped_df = create_pandas_cropped_images()
+    print(cropped_df)
 
 
 if __name__ == '__main__':
