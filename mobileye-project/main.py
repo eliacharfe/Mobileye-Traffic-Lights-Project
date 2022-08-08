@@ -15,18 +15,18 @@ try:
     import cv2
     from skimage.feature import peak_local_max
     import re
-    import consts as const
+    import consts as C
 except ImportError:
     print("Need to fix the installation")
     raise
 
 
-def convolve_red(image:  const.NDArray, h: float, red_filter:  const.NDArray) -> List[Tuple]:
+def convolve_red(image:  C.NDArray, h: float, red_filter:  C.NDArray) -> List[Tuple]:
     # red_filtered_image = Image.fromarray(image[:, :, 0])
     red_filter_lee = red_filter
     red_filtered_image = image[:, :, 0]
     plt.subplot(2, 2, 2, sharex=h, sharey=h)
-    red_conv = sg.convolve2d(red_filtered_image, const.kernel)
+    red_conv = sg.convolve2d(red_filtered_image, C.kernel)
     plt.imshow(red_conv)
     #plt.imshow(red_conv > 6)
     plt.title("Convolved red")
@@ -46,7 +46,7 @@ def convolve_red(image:  const.NDArray, h: float, red_filter:  const.NDArray) ->
 def convolve_green(image, h: float):
     green_filtered_image = image[:, :, 1]
     plt.subplot(2, 2, 3, sharex=h, sharey=h)
-    green_conv = sg.convolve2d(green_filtered_image,  const.kernel)
+    green_conv = sg.convolve2d(green_filtered_image, C.kernel)
     plt.imshow(green_conv)
     #plt.imshow(green_conv > 6)
     plt.title("Convolved green")
@@ -57,13 +57,13 @@ def convolve_green(image, h: float):
     return coordinates
 
 
-def red_filter(image_path: str) ->  const.NDArray:
+def red_filter(image_path: str) ->  C.NDArray:
     # lower mask (0-10)
 
     image = np.array(Image.open(image_path))
-    image = image[:int(image.shape[0] *  const.CROPPED_PERCENT), :]
+    image = image[:int(image.shape[0] * C.CROPPED_PERCENT), :]
     img = cv2.imread(image_path)
-    img = img[:int(img.shape[0] *  const.CROPPED_PERCENT), :]
+    img = img[:int(img.shape[0] * C.CROPPED_PERCENT), :]
 
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     lower_red = np.array([0, 50, 50])
@@ -85,7 +85,7 @@ def red_filter(image_path: str) ->  const.NDArray:
     return image_max_2d
 
 
-def find_tfl_lights(image:  const.NDArray, *args: any) -> Tuple[List[float]]:
+def find_tfl_lights(image:  C.NDArray, *args: any) -> Tuple[List[float]]:
     """
     Detect candidates for TFL lights. Use image, kwargs
     :param image: The image itself as np.uint8, shape of (H, W, 3)
@@ -112,7 +112,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple) -> None:
 
     if not objects:
         image = np.array(plt.imread(image_path))
-        cropped_image = image[:int(image.shape[0] *  const.CROPPED_PERCENT), :]
+        cropped_image = image[:int(image.shape[0] * C.CROPPED_PERCENT), :]
 
         red_filter_2d = red_filter(image_path)
         h = plt.subplot(2, 2, 1)
@@ -122,7 +122,7 @@ def test_find_tfl_lights(image_path, json_path=None, fig_num=tuple) -> None:
         plt.imshow(cropped_image)
         plt.plot(green_x, green_y, 'ro', color='g', markersize=3)
         plt.plot(red_x, red_y, 'ro', color='r', markersize=3)
-        plt.title(f"black = { const.BLACK}, white = { const.WHITE}")
+        plt.title(f"black = { C.BLACK}, white = { C.WHITE}")
         plt.show()
 
 
@@ -144,7 +144,7 @@ def main(argv=None):
     flist = glob.glob(os.path.join(args.dir, '*_leftImg8bit.png'))
 
     for image in flist:
-        json_fn = image.replace(const.EXTENSION_IMG, '_gtFine_polygons.json')
+        json_fn = image.replace(C.EXTENSION_IMG, '_gtFine_polygons.json')
         if not os.path.exists(json_fn):
             json_fn = None
         test_find_tfl_lights(image, json_fn)

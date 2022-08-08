@@ -64,9 +64,10 @@ PNG = '.png'
 CROPPED = 'cropped'
 
 
-default_base_dir = '../../data/v1'
+default_base_dir = r'C:\leftImg8bit'
 attention_results = 'attention_results'
-crops_dir = os.path.join(attention_results, 'crop')
+# crops_dir = os.path.join(attention_results, 'crop')
+crops_dir = os.path.join('cropped')
 attention_results_h5 = 'attention_results.h5'
 crop_results_h5 = 'crop_results.h5'
 models_output_dir = 'logs_and_models'

@@ -17,7 +17,7 @@ try:
     from skimage.feature import peak_local_max
     import skimage.transform as st
     import math
-    import consts as const
+    import consts as C
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -33,19 +33,19 @@ def create_bounding_rectangle(image, tf_details, temp_cropped_df):
         if math.isnan(tf_x):
             continue
             # plt.plot(tf_x, tf_y, 'ro', color=tf_color, markersize=3)
-        if tf_color == const.RED:
-            x = tf_x + const.X_AXIS*(1-zoom)
-            y = tf_y - const.Y_AXIS*(1-zoom)
+        if tf_color == C.RED:
+            x = tf_x + C.X_AXIS * (1 - zoom)
+            y = tf_y - C.Y_AXIS * (1 - zoom)
             top_right = (x, y if y > 0 else 0)
-            x = tf_x - const.X_AXIS*(1-zoom)
-            y = tf_y + (const.HEIGHT - const.Y_AXIS)*(1-zoom)
+            x = tf_x - C.X_AXIS * (1 - zoom)
+            y = tf_y + (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
             bottom_left = (x if x > 0 else 0, y)
         else:
-            x = tf_x + const.X_AXIS*(1-zoom)
-            y = tf_y - (const.HEIGHT - const.Y_AXIS)*(1-zoom)
+            x = tf_x + C.X_AXIS * (1 - zoom)
+            y = tf_y - (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
             top_right = (x, y if y > 0  else 0)
-            x = tf_x - const.X_AXIS*(1-zoom)
-            y = tf_y + const.Y_AXIS*(1-zoom)
+            x = tf_x - C.X_AXIS * (1 - zoom)
+            y = tf_y + C.Y_AXIS * (1 - zoom)
             bottom_left = (x if x > 0 else 0, y)
 
         rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
@@ -71,7 +71,7 @@ def get_rect(gray, pix_range, tf_x, tf_y, threshold, color, op):
                 size += i
                 break
 
-    if color == const.RED:
+    if color == C.RED:
         top_right = (tf_x + size, tf_y - size if tf_y - size > 0 else 0)
         bottom_left = (tf_x - size if tf_x - size > 0 else 0, tf_y + 4 * size)
     else:
@@ -91,7 +91,7 @@ def new_bounding_rectangle(image, tf_axis_and_color, temp_cropped_df):
         if math.isnan(tf_x):
             continue
         # plt.plot(tf_x, tf_y, 'ro', color=color, markersize=3)
-        if color == const.RED:
+        if color == C.RED:
             top_right, bottom_left, size = get_rect(gray, 25, tf_x, tf_y, 0.300, color, '+')
         else:  # green color
             top_right, bottom_left, size = get_rect(gray, 50, tf_x, tf_y, 0.250, color, '-')
@@ -123,7 +123,7 @@ def calculate_percentage(num_orange_pix, total_pix, label_image, center_point: t
         if percentage >= 95:
             return connected_component(label_image, num_orange_pix, center_point)
         return True
-    return const.IS_IGNORE
+    return C.IS_IGNORE
 
 
 def get_top_rights_bottom_lefts(coordinates_x, coordinates_y):
@@ -146,7 +146,7 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
         crop_tl = label_im[int(top_right[1]): int(bottom_left_arr[i][1]),
                            int(bottom_left_arr[i][0]): int(top_right[0])]
 
-        count_orange_pixels = np.count_nonzero(np.all(crop_tl == const.ORANGE_PIXEL, axis=2))
+        count_orange_pixels = np.count_nonzero(np.all(crop_tl == C.ORANGE_PIXEL, axis=2))
 
         diff_x = int(top_right[0]) - int(bottom_left_arr[i][0])
         diff_y = int(bottom_left_arr[i][1]) - int(top_right[1])
@@ -154,11 +154,11 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
 
         res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1], (diff_x // 2, diff_y // 2))
 
-        if res == const.IS_IGNORE:
-            temp_cropped_df.iat[i, const.INDEX_IGNORE] = True
+        if res == C.IS_IGNORE:
+            temp_cropped_df.iat[i, C.INDEX_IGNORE] = True
             # temp_cropped_df["is_ignore"].loc[temp_cropped_df['x0'] == top_right[0]] = True
         elif res:
-            temp_cropped_df.iat[i, const.INDEX_TRUE] = True
+            temp_cropped_df.iat[i, C.INDEX_TRUE] = True
             # temp_cropped_df["is_true"].loc[temp_cropped_df['x0'] == top_right[0]] = True
         # plt.imshow(crop_tl)
         # plt.show()
@@ -166,55 +166,55 @@ def label_calculate(paths_image, coordinates_x, coordinates_y, temp_cropped_df):
 
 def crop_tf_from_image(image_name: str, image_path: str, image: np.array, temp_cropped_df: pd.DataFrame) -> None:
 
-    cropped_image_path = os.path.join(re.sub('/[^/]+.png', '/', image_path), const.CROPPED)
+    cropped_image_path = os.path.join(re.sub('/[^/]+.png', '/', image_path), C.CROPPED)
     if not os.path.exists(cropped_image_path):
         os.mkdir(cropped_image_path)
 
-    cropped_image_path_true = cropped_image_path + const.DIRECTORY_TRUE
-    cropped_image_path_false = cropped_image_path + const.DIRECTORY_FALSE
-    cropped_image_path_ignore = cropped_image_path + const.DIRECTORY_IGNORE
+    cropped_image_path_true = cropped_image_path + C.DIRECTORY_TRUE
+    cropped_image_path_false = cropped_image_path + C.DIRECTORY_FALSE
+    cropped_image_path_ignore = cropped_image_path + C.DIRECTORY_IGNORE
 
     for index in temp_cropped_df.index:
-        cropped_image = image[int(temp_cropped_df[const.Y0][index]):int(temp_cropped_df[const.Y1][index]),
-                              int(temp_cropped_df[const.X1][index]):int(temp_cropped_df[const.X0][index])]
+        cropped_image = image[int(temp_cropped_df[C.Y0][index]):int(temp_cropped_df[C.Y1][index]),
+                        int(temp_cropped_df[C.X1][index]):int(temp_cropped_df[C.X0][index])]
 
-        directory = const.DIRECTORY_TRUE
-        cropped_image_name = image_name.replace(const.EXTENSION_IMG, '') + '_' + temp_cropped_df[const.COL][index]
+        directory = C.DIRECTORY_TRUE
+        cropped_image_name = image_name.replace(C.EXTENSION_IMG, '') + '_' + temp_cropped_df[C.COL][index]
 
-        if temp_cropped_df[const.IS_TRUE][index]:
-            cropped_image_name += const.T
+        if temp_cropped_df[C.IS_TRUE][index]:
+            cropped_image_name += C.T
             if not os.path.isdir(cropped_image_path_true):
                 os.mkdir(cropped_image_path_true)
-        elif not temp_cropped_df[const.IS_IGNORE][index]:
-            cropped_image_name += const.F
-            directory = const.DIRECTORY_FALSE
+        elif not temp_cropped_df[C.IS_IGNORE][index]:
+            cropped_image_name += C.F
+            directory = C.DIRECTORY_FALSE
             if not os.path.isdir(cropped_image_path_false):
                 os.mkdir(cropped_image_path_false)
         else:
-            cropped_image_name += const.I
-            directory = const.DIRECTORY_IGNORE
+            cropped_image_name += C.I
+            directory = C.DIRECTORY_IGNORE
             if not os.path.isdir(cropped_image_path_ignore):
                 os.mkdir(cropped_image_path_ignore)
-        cropped_image_name += '_' + str(temp_cropped_df[const.SEQ][index]).zfill(5) + const.PNG
-        temp_cropped_df.at[index, const.PATH] = cropped_image_name
+        cropped_image_name += '_' + str(temp_cropped_df[C.SEQ][index]).zfill(5) + C.PNG
+        temp_cropped_df.at[index, C.PATH] = cropped_image_name
 
         plt.imsave(cropped_image_path + directory + '/' + cropped_image_name, st.resize(cropped_image, (200, 100)))
 
 
 def create_pandas_cropped_images():
-    df = data.create_data_frame(const.attention_results_h5)
+    df = data.create_data_frame(C.attention_results_h5)
     path_dict = data.create_data()
-    cropped_df = pd.DataFrame(columns=[const.SEQ, const.IS_TRUE, const.IS_IGNORE, const.PATH, const.X0, const.X1,
-                                       const.Y0, const.Y1, const.COL])
+    cropped_df = pd.DataFrame(columns=[C.SEQ, C.IS_TRUE, C.IS_IGNORE, C.PATH, C.X0, C.X1,
+                                       C.Y0, C.Y1, C.COL])
 
     # image_tf_details - panda contains the images : all traffic lights x, y, color and zoom
     for image_name in path_dict.keys():
         im = plt.imread(path_dict[image_name][0])
         temp_cropped_df = pd.DataFrame(
-            columns=[const.SEQ, const.IS_TRUE, const.IS_IGNORE, const.PATH, const.X0, const.X1, const.Y0,
-                     const.Y1, const.COL])
+            columns=[C.SEQ, C.IS_TRUE, C.IS_IGNORE, C.PATH, C.X0, C.X1, C.Y0,
+                     C.Y1, C.COL])
 
-        image_tf_details = df.loc[df[const.PATH] == image_name][[const.X, const.Y, const.COL, const.ZOOM]]
+        image_tf_details = df.loc[df[C.PATH] == image_name][[C.X, C.Y, C.COL, C.ZOOM]]
         tf_coordinates_x, tf_coordinates_y = create_bounding_rectangle(im, image_tf_details, temp_cropped_df)
         label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
 
