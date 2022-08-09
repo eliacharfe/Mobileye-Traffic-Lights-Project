@@ -237,13 +237,6 @@ def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.Dat
     if not os.path.exists(C.PATH_CROPPED):
         os.mkdir(C.PATH_CROPPED)
 
-    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_TRUE):
-        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_TRUE)
-    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_FALSE):
-        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_FALSE)
-    if not os.path.exists(C.PATH_CROPPED + C.DIRECTORY_IGNORE):
-        os.mkdir(C.PATH_CROPPED + C.DIRECTORY_IGNORE)
-
     for index in temp_cropped_df.index:
         cropped_image = image[int(temp_cropped_df[C.Y0][index]):int(temp_cropped_df[C.Y1][index]),
                               int(temp_cropped_df[C.X1][index]):int(temp_cropped_df[C.X0][index])]
@@ -252,17 +245,15 @@ def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.Dat
 
         if temp_cropped_df[C.IS_TRUE][index]:
             cropped_image_name += C.T
-            directory = C.DIRECTORY_TRUE
         elif not temp_cropped_df[C.IS_IGNORE][index]:
             cropped_image_name += C.F
-            directory = C.DIRECTORY_FALSE
         else:
             cropped_image_name += C.I
-            directory = C.DIRECTORY_IGNORE
 
         cropped_image_name += '_' + str(temp_cropped_df[C.SEQ][index]).zfill(5) + C.PNG
         temp_cropped_df.at[index, C.PATH] = cropped_image_name
-        plt.imsave(C.PATH_CROPPED + directory + '/' + cropped_image_name, st.resize(cropped_image, (200, 100)))
+        img = Image.fromarray((st.resize(cropped_image, (200, 100)) * 255).astype(np.uint8))
+        img.save(C.PATH_CROPPED + '/' + cropped_image_name)
 
 
 def create_pandas_cropped_images():
