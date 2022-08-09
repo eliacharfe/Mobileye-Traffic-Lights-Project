@@ -27,39 +27,42 @@ def run_one_train_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet
     :param balance_samples: As we have much more False than True, we balance them
     :return:
     """
-    train_dataset = dataset
-    num_tif = train_dataset.get_num_tif()
-    t_weight = 1. / num_tif[0]
-    f_weight = 1. / num_tif[2]
-    weights = torch.tensor(np.where(train_dataset.crop_data[C.IS_TRUE], t_weight, f_weight))
-    sampler = WeightedRandomSampler(weights, len(weights)) if balance_samples else None
-    data_loader = DataLoader(train_dataset, batch_size=16, sampler=sampler)
-    loss_func = model.loss_func
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
-    acc_loss = 0
-    tot_samples = 0
-    for i_batch, batch in enumerate(data_loader):
+    try:
+        train_dataset = dataset
+        num_tif = train_dataset.get_num_tif()
+        t_weight = 1. / num_tif[0]
+        f_weight = 1. / num_tif[2]
+        weights = torch.tensor(np.where(train_dataset.crop_data[C.IS_TRUE], t_weight, f_weight))
+        sampler = WeightedRandomSampler(weights, len(weights)) if balance_samples else None
+        data_loader = DataLoader(train_dataset, batch_size=16, sampler=sampler)
+        loss_func = model.loss_func
+        optimizer = optim.Adam(model.parameters(), lr=0.0001)
+        acc_loss = 0
+        tot_samples = 0
+        for i_batch, batch in enumerate(data_loader):
 
-        imgs = (batch['image'] / 255).to(device)  # Note: imgs is float32
-        labs = (batch['label']).to(device).float()
+            imgs = (batch['image'] / 255).to(device)  # Note: imgs is float32
+            labs = (batch['label']).to(device).float()
 
-        bs = len(imgs)
+            bs = len(imgs)
 
-        # zero the gradient buffers
-        optimizer.zero_grad()
+            # zero the gradient buffers
+            optimizer.zero_grad()
 
-        # predict:
-        preds = model(imgs)
+            # predict:
+            preds = model(imgs)
 
-        loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
+            loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
 
-        acc_loss += float(loss.detach()) * bs
-        tot_samples += bs
+            acc_loss += float(loss.detach()) * bs
+            tot_samples += bs
 
-        # (1) propagate the loss, and (2) do the update
-        loss.backward()
-        optimizer.step()
-    return model, -1 if tot_samples == 0 else acc_loss / tot_samples
+            # (1) propagate the loss, and (2) do the update
+            loss.backward()
+            optimizer.step()
+        return model, -1 if tot_samples == 0 else acc_loss / tot_samples
+    except Exception as e:
+        print(e)
 
 
 def run_one_test_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet) -> (float, dict):
@@ -111,30 +114,33 @@ def train_a_model(model: MyNeuralNetworkBase,
     :param num_epochs: How many rounds.. You will eventually need to raise to hundreds
     :return: Filename of last the saved model
     """
-    writer = SummaryWriter(log_dir)
-    metadata = None
-    for ep in range(num_epochs):
-        ep_time_start = datetime.datetime.now()
-        model, train_loss = run_one_train_epoch(model=model, dataset=train_dataset, balance_samples=True)
-        test_loss, test_scores = run_one_test_epoch(model=model, dataset=test_dataset)
-        ep_time_end = datetime.datetime.now()
+    try:
+        writer = SummaryWriter(log_dir)
+        metadata = None
+        for ep in range(num_epochs):
+            ep_time_start = datetime.datetime.now()
+            model, train_loss = run_one_train_epoch(model=model, dataset=train_dataset, balance_samples=True)
+            test_loss, test_scores = run_one_test_epoch(model=model, dataset=test_dataset)
+            ep_time_end = datetime.datetime.now()
 
-        print(f'Epoch {ep}: train/test: {train_loss}, {test_loss}, '
-              f'took {str(ep_time_end - ep_time_start)[2:-3]}')
-        writer.add_scalars('Loss', {'train': train_loss, 'test': test_loss}, ep)
-        metadata = {
-            'model_name': model.name,
-            'num_epochs': ep,
-            'last_train_error': train_loss,
-            'last_test_error': test_loss,
-        }
-        if ((ep + 1) % 10) == 0 or ep + 1 == num_epochs:
-            # It's a good idea to save the model while training... So you can test it before the loop ends
-            ModelManager.save_model(model, log_dir, metadata, suffix=f'_{ep:04}')
+            print(f'Epoch {ep}: train/test: {train_loss}, {test_loss}, '
+                  f'took {str(ep_time_end - ep_time_start)[2:-3]}')
+            writer.add_scalars('Loss', {'train': train_loss, 'test': test_loss}, ep)
+            metadata = {
+                'model_name': model.name,
+                'num_epochs': ep,
+                'last_train_error': train_loss,
+                'last_test_error': test_loss,
+            }
+            if ((ep + 1) % 10) == 0 or ep + 1 == num_epochs:
+                # It's a good idea to save the model while training... So you can test it before the loop ends
+                ModelManager.save_model(model, log_dir, metadata, suffix=f'_{ep:04}')
 
-    model_path = ModelManager.save_model(model, log_dir, metadata)
+        model_path = ModelManager.save_model(model, log_dir, metadata)
 
-    return model_path
+        return model_path
+    except Exception as e:
+        print(e)
 
 
 def go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=20):

@@ -324,7 +324,5 @@ def main():
     attention_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')
 
 
-
-
 if __name__ == '__main__':
     main()

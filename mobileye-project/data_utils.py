@@ -45,7 +45,7 @@ class TrafficLightDataSet(Dataset):
         self.is_train = is_train
         self.full_image_base = full_image_dir  # C.default_train_images
         self.base_dir = base_dir
-        self.crop_dir = os.path.join(base_dir, C.crops_dir, C.DIR_TRUE)
+        self.crop_dir = os.path.join(base_dir, C.crops_dir)
         crops_h5_path = os.path.join(base_dir, C.attention_results, C.crop_results_h5)
         attention_h5_path = os.path.join(base_dir, C.attention_results, C.attention_results_h5)
         crop_data = pd.read_hdf(crops_h5_path)  # type: pd.DataFrame
