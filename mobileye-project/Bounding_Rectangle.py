@@ -303,13 +303,23 @@ def create_pandas_cropped_images():
 
 def main():
     cropped_df = create_pandas_cropped_images()
-    print(cropped_df)
+    # print(cropped_df)
     attention_df = data.create_data_frame(C.attention_results_h5)
+    attention_df = attention_df.dropna()
+    # print(attention_df)
 
     path_to_h5 = C.BASE_DIR + '/' + C.attention_results
 
     if not os.path.exists(path_to_h5):
         os.mkdir(path_to_h5)
+
+    cropped_df[C.IS_TRUE] = cropped_df[C.IS_TRUE].astype('bool')
+    cropped_df[C.IS_IGNORE] = cropped_df[C.IS_IGNORE].astype('bool')
+    cropped_df[C.SEQ] = cropped_df[C.SEQ].astype('uint8')
+    cropped_df[C.X0] = cropped_df[C.X0].astype('float64')
+    cropped_df[C.X1] = cropped_df[C.X1].astype('float64')
+    cropped_df[C.Y0] = cropped_df[C.Y0].astype('float64')
+    cropped_df[C.Y1] = cropped_df[C.Y1].astype('float64')
 
     cropped_df.to_hdf(path_to_h5 + '/' + C.crop_results_h5, key='df', mode='w')
     attention_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')

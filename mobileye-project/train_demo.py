@@ -50,7 +50,7 @@ def run_one_train_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet
             optimizer.zero_grad()
 
             # predict:
-            print(f"shape is: {imgs.shape}")
+
             preds = model(imgs)
 
             loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
@@ -73,31 +73,34 @@ def run_one_test_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet)
     :param dataset: Data to work on
     :return: loss, scores
     """
-    test_loader = DataLoader(dataset, batch_size=16)
-    loss_func = model.loss_func
+    try:
+        test_loader = DataLoader(dataset, batch_size=16)
+        loss_func = model.loss_func
 
-    acc_loss = 0
-    all_scores_acc = {TrafficLightDataSet.SEQ: [],
-                      TrafficLightDataSet.SCORE: [],
-                      TrafficLightDataSet.PREDS: [],
-                      }
-    # no_grad is VERY IMPORTANT when you don't want to train... Much faster, and less memory
-    with torch.no_grad():
-        for i_batch, batch in enumerate(test_loader):
-            imgs = (batch[TrafficLightDataSet.IMAGE] / 255).to(device)  # Note: imgs is float32
-            labs = (batch[TrafficLightDataSet.LABEL]).to(device).float()
-            bs = len(imgs)
-            # predict:
-            preds = model(imgs)
-            score = model.pred_to_score(preds)
-            loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
-            acc_loss += float(loss.detach()) * bs
-            all_scores_acc[TrafficLightDataSet.SEQ].extend(batch[TrafficLightDataSet.SEQ].tolist())
-            all_scores_acc[TrafficLightDataSet.PREDS].extend(preds.numpy().ravel().tolist())
-            all_scores_acc[TrafficLightDataSet.SCORE].extend(score.numpy().ravel().tolist())
-    tot_samples = len(all_scores_acc[TrafficLightDataSet.SCORE])
-    loss = -1 if tot_samples == 0 else acc_loss / tot_samples
-    return loss, all_scores_acc
+        acc_loss = 0
+        all_scores_acc = {TrafficLightDataSet.SEQ: [],
+                          TrafficLightDataSet.SCORE: [],
+                          TrafficLightDataSet.PREDS: [],
+                          }
+        # no_grad is VERY IMPORTANT when you don't want to train... Much faster, and less memory
+        with torch.no_grad():
+            for i_batch, batch in enumerate(test_loader):
+                imgs = (batch[TrafficLightDataSet.IMAGE] / 255).to(device)  # Note: imgs is float32
+                labs = (batch[TrafficLightDataSet.LABEL]).to(device).float()
+                bs = len(imgs)
+                # predict:
+                preds = model(imgs)
+                score = model.pred_to_score(preds)
+                loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
+                acc_loss += float(loss.detach()) * bs
+                all_scores_acc[TrafficLightDataSet.SEQ].extend(batch[TrafficLightDataSet.SEQ].tolist())
+                all_scores_acc[TrafficLightDataSet.PREDS].extend(preds.detach().cpu().numpy().ravel().tolist())
+                all_scores_acc[TrafficLightDataSet.SCORE].extend(score.detach().cpu().numpy().ravel().tolist())
+        tot_samples = len(all_scores_acc[TrafficLightDataSet.SCORE])
+        loss = -1 if tot_samples == 0 else acc_loss / tot_samples
+        return loss, all_scores_acc
+    except Exception as e:
+        print(e)
 
 
 def train_a_model(model: MyNeuralNetworkBase,
@@ -225,7 +228,7 @@ def main():
         model_name = 'my_model_final_2'
         train_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=True)
         test_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=False)
-        trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=3)
+        trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=20)
         examine_my_results(base_dir, full_images_dir, trained_model_path, test_dataset)
     except Exception as e:
         print(e)
