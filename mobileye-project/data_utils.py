@@ -127,8 +127,9 @@ class MyNeuralNetworkBase(nn.Module):
         # Here are some totally useless layers. See what YOU need!
         self.layers = (nn.Conv2d(self.num_in_channels, 5, (3, 3)),
                        nn.ReLU(),
+                       nn.MaxPool2d((2, 2), 2),
                        nn.Flatten(1, -1),
-                       nn.Linear(5 * (self.w-2) * (self.h-2), 1),
+                       nn.Linear(int(5 * ((self.w - 2) * 0.5) * ((self.h - 2) * 0.5)), 1),
                        )
 
         # This is the recommended loss:
