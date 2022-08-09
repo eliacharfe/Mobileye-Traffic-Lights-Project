@@ -252,7 +252,7 @@ def crop_tf_from_image(image_name: str, image: np.array, temp_cropped_df: pd.Dat
 
         cropped_image_name += '_' + str(temp_cropped_df[C.SEQ][index]).zfill(5) + C.PNG
         temp_cropped_df.at[index, C.PATH] = cropped_image_name
-        img = Image.fromarray((st.resize(cropped_image, (200, 100)) * 255).astype(np.uint8))
+        img = Image.fromarray((st.resize(cropped_image, (C.default_crop_w, C.default_crop_h)) * 255).astype(np.uint8))
         img.save(C.PATH_CROPPED + '/' + cropped_image_name)
 
 

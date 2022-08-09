@@ -82,5 +82,5 @@ DIR_IGNORE = 'Ignore'
 EXTENSION_IMG = '_leftImg8bit.png'
 
 # Crop size:
-default_crop_w = 32
-default_crop_h = 96
+default_crop_w = 96
+default_crop_h = 32

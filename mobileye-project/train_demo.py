@@ -51,11 +51,6 @@ def run_one_train_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet
 
             # predict:
             print(f"shape is: {imgs.shape}")
-
-            path = 'C:/leftImg8bit/crops/aachen_000001_000019_rF_00000.png'
-
-            plt.imshow(imgs)
-            plt.show()
             preds = model(imgs)
 
             loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
