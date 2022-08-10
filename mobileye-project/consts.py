@@ -84,3 +84,15 @@ EXTENSION_IMG = '_leftImg8bit.png'
 # Crop size:
 default_crop_w = 96
 default_crop_h = 32
+
+num_of_epochs = 20
+
+# Layers param:
+kernel_dimention = 2
+conv_kernel_shape = (3, 3)
+kernel_sub = 0  # 3-4 = 0 , 5-6 = 1, 7,8 = 2 and so on...
+max_pooling_kernel_shape = (2, 2)
+max_pooling_stride = 2
+padding = 1
+num_of_layers = 5
+

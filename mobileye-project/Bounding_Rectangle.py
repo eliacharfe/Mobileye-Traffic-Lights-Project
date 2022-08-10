@@ -54,7 +54,7 @@ def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.Data
         else:
             x = tf_x + C.X_AXIS * (1 - zoom)
             y = tf_y - (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
-            top_right = (x, y if y > 0  else 0)
+            top_right = (x, y if y > 0 else 0)
             x = tf_x - C.X_AXIS * (1 - zoom)
             y = tf_y + C.Y_AXIS * (1 - zoom)
             bottom_left = (x if x > 0 else 0, y)

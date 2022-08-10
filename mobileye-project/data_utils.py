@@ -19,6 +19,8 @@ pd.set_option('display.width', 200, 'display.max_rows', 200,
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using {device} device")
 
+def cal_shape(axis, padding, dimension, kernel_size, stride):
+    return int((axis + 2*padding - dimension*(kernel_size - 1) - 1)/stride + 1)
 
 class TrafficLightDataSet(Dataset):
     SEQ = 'seq'
@@ -125,11 +127,19 @@ class MyNeuralNetworkBase(nn.Module):
     def set_net_and_loss(self):
         # Feel free to inherit this class and override this function.
         # Here are some totally useless layers. See what YOU need!
-        self.layers = (nn.Conv2d(self.num_in_channels, 5, (3, 3)),
+        shape_after_conv_height = cal_shape(self.h, C.padding, C.kernel_dimention, C.conv_kernel_shape[0]-C.kernel_sub, 1)
+        shape_after_conv_width = cal_shape(self.w, C.padding, C.kernel_dimention, C.conv_kernel_shape[0]-C.kernel_sub, 1)
+
+        shape_after_maxPool_height = cal_shape(shape_after_conv_height, C.padding, C.kernel_dimention,
+                                               C.max_pooling_kernel_shape[0], C.max_pooling_stride)
+        shape_after_maxPool_width = cal_shape(shape_after_conv_width, C.padding, C.kernel_dimention,
+                                              C.max_pooling_kernel_shape[0], C.max_pooling_stride)
+
+        self.layers = (nn.Conv2d(self.num_in_channels, C.num_of_layers, C.conv_kernel_shape),
                        nn.ReLU(),
-                       nn.MaxPool2d((2, 2), 2),
+                       nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
                        nn.Flatten(1, -1),
-                       nn.Linear(int(5 * ((self.w - 2) * 0.5) * ((self.h - 2) * 0.5)), 1),
+                       nn.Linear(int(C.num_of_layers * shape_after_maxPool_width*shape_after_maxPool_height), 1),
                        )
 
         # This is the recommended loss:
