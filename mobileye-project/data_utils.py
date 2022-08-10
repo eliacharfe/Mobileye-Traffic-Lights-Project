@@ -139,8 +139,6 @@ class MyNeuralNetworkBase(nn.Module):
         self.layers = (nn.Conv2d(self.num_in_channels, C.num_of_layers, C.conv_kernel_shape),
                        nn.ReLU(),
                        nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
-                       # nn.ReLU(),
-                       nn.MaxPool2d((2, 2), 2),
                        nn.Flatten(1, -1),
                        nn.Linear(int(C.num_of_layers * shape_after_maxPool_width*shape_after_maxPool_height), 1),
                        )

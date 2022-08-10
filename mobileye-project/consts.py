@@ -85,7 +85,7 @@ EXTENSION_IMG = '_leftImg8bit.png'
 default_crop_w = 96
 default_crop_h = 32
 
-num_of_epochs = 20
+num_of_epochs = 10
 
 # Layers param:
 kernel_dimention = 2
