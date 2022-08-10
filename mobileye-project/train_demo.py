@@ -50,7 +50,6 @@ def run_one_train_epoch(model: MyNeuralNetworkBase, dataset: TrafficLightDataSet
             optimizer.zero_grad()
 
             # predict:
-
             preds = model(imgs)
 
             loss = loss_func()(preds.reshape(bs), labs.reshape(bs))
