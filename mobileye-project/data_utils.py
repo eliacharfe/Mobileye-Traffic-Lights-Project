@@ -136,9 +136,24 @@ class MyNeuralNetworkBase(nn.Module):
         shape_after_maxPool_width = cal_shape(shape_after_conv_width, C.padding, C.kernel_dimention,
                                               C.max_pooling_kernel_shape[0], C.max_pooling_stride)
 
+        shape_after_conv_height = cal_shape(shape_after_maxPool_height, C.padding, C.kernel_dimention,
+                                            C.conv_kernel_shape[0] -1, 1)
+        shape_after_conv_width = cal_shape(shape_after_maxPool_width, C.padding, C.kernel_dimention, C.conv_kernel_shape[0] -1,
+                                           1)
+
+        shape_after_maxPool_height = cal_shape(shape_after_conv_height, C.padding, C.kernel_dimention,
+                                               C.max_pooling_kernel_shape[0], C.max_pooling_stride)
+        shape_after_maxPool_width = cal_shape(shape_after_conv_width, C.padding, C.kernel_dimention,
+                                              C.max_pooling_kernel_shape[0], C.max_pooling_stride)
+
         self.layers = (nn.Conv2d(self.num_in_channels, C.num_of_layers, C.conv_kernel_shape),
                        nn.ReLU(),
                        nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
+                       nn.Conv2d(C.second_num_of_channels, C.num_of_layers, C.conv_kernel_shape),
+                       nn.ReLU(),
+                       nn.ReLU(),
+                       nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
+                       nn.ReLU(),
                        nn.Flatten(1, -1),
                        nn.Linear(int(C.num_of_layers * shape_after_maxPool_width*shape_after_maxPool_height), 1),
                        )

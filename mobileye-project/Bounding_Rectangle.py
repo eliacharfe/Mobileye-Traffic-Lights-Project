@@ -215,8 +215,9 @@ def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y:
 
         res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1],
                                    (image_tf_details['x'][i], image_tf_details['y'][i]))
+        if res == C.IS_IGNORE_SMALL:
 
-        if res == C.IS_IGNORE:
+        elif res == C.IS_IGNORE:
             temp_cropped_df.iat[i, C.INDEX_IGNORE] = True
         elif res:
             temp_cropped_df.iat[i, C.INDEX_TRUE] = True
