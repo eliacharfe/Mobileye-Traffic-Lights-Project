@@ -4,28 +4,17 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import torch
-import torch.optim as optim
 from PIL import Image
-from torch.utils.data import DataLoader, WeightedRandomSampler
-from torch.utils.tensorboard import SummaryWriter
 import skimage.transform as st
-
 import consts as C
-from data_utils import TrafficLightDataSet, ModelManager, MyNeuralNetworkBase
-from mpl_goodies import nn_examiner_example
-
-from torch import nn
-from torch.utils.data import Dataset
-
-from data_utils import device
-
+import torchvision.transforms as transforms
 import Bounding_Rectangle
 import data
+import data_utils
 
 
-def create_crops_af_image(image_name: str):
-    path_to_save_crops_of_image = 'C:/leftImg8bit/temp_crop'
+def create_crops_af_image(path_to_save_crops_of_image: str, image_name: str):
+    # path_to_save_crops_of_image = 'C:/leftImg8bit/temp_crop'
     if not os.path.exists(path_to_save_crops_of_image):
         os.mkdir(path_to_save_crops_of_image)
 
@@ -61,4 +50,29 @@ def create_crops_af_image(image_name: str):
 
     return temp_cropped_df
 
+
+def test(trained_model_path):
+
+    image_name = 'aachen_000004_000019_leftImg8bit.png'
+    path_to_dir = 'C:/leftImg8bit/temp_crop'
+    crop_df = create_crops_af_image(path_to_dir, image_name)
+
+    my_model = data_utils.ModelManager.load_model(trained_model_path)
+    # # print(my_model)
+
+    for i, row in crop_df.iterrows():
+        # im = plt.imread(path_to_dir + '/' + row['path'])
+        image = Image.open(path_to_dir + '/' + row['path'])
+
+        transform = transforms.Compose([
+            transforms.PILToTensor()
+        ])
+
+        img_tensor = transform(image)
+        print(img_tensor)
+
+        print(img_tensor.shape)
+
+        preds = my_model(img_tensor.shape[:2])
+        print(preds)
 

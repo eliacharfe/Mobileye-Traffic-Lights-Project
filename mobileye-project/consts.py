@@ -73,6 +73,7 @@ attention_results_h5 = 'attention_results.h5'
 crop_results_h5 = 'crop_results.h5'
 models_output_dir = 'logs_and_models'
 logs_dir = 'logs'
+model_name = 'my_model_final_2'
 
 BASE_DIR = 'C:/leftImg8bit'
 
@@ -86,12 +87,16 @@ EXTENSION_IMG = '_leftImg8bit.png'
 default_crop_w = 96
 default_crop_h = 32
 
+FALSE_THRESHOLD = 40
+TRUE_THRESHOLD = 60
+HIGHER_THRESHOLD = 95
 
-num_of_epochs = 30
+
+num_of_epochs = 2
 
 # Layers param:
 kernel_dimention = 2
-conv_kernel_shape = (5, 5)
+conv_kernel_shape = (3, 3)
 kernel_sub = 0  # 3-4 = 0 , 5-6 = 1, 7,8 = 2 and so on...
 max_pooling_kernel_shape = (2, 2)
 max_pooling_stride = 1

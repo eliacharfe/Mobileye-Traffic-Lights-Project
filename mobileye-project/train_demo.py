@@ -231,33 +231,15 @@ def examine_my_results(base_dir,
 
 def main():
     try:
-        base_dir = r'C:\leftImg8bit'
-        full_images_dir = r'C:\leftImg8bit\train'
-        model_name = 'my_model_final_2'
+        base_dir = C.default_base_dir
+        full_images_dir = C.default_base_dir + r'\train'
+        model_name = C.model_name
         train_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=True)
         test_dataset = TrafficLightDataSet(base_dir, full_images_dir, is_train=False)
         trained_model_path = go_train(base_dir, model_name, train_dataset, test_dataset, num_epochs=C.num_of_epochs)
         examine_my_results(base_dir, full_images_dir, trained_model_path, test_dataset)
 
-        image_name = 'aachen_000004_000019_leftImg8bit.png'
-        crop_df = test_demo.create_crops_af_image(image_name)
-
-        # my_model = data_utils.ModelManager.load_model(trained_model_path)
-        # # print(my_model)
-
-        # path_to_dir = 'C:/leftImg8bit/temp_crop'
-        for i, row in crop_df.iterrows():
-            # im = plt.imread(path_to_dir + '/' + row['path'])
-            image = Image.open('iceland.jpg')
-
-            transform = transforms.Compose([
-                transforms.PILToTensor()
-            ])
-
-            img_tensor = transform(image)
-            print(img_tensor)
-            # preds = my_model(im)
-            # print(preds)
+        test_demo.test(trained_model_path)
 
     except Exception as e:
         print(f"Main exception: {e}")

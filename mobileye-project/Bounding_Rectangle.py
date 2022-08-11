@@ -28,7 +28,7 @@ except ImportError:
     raise
 
 
-def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.DataFrame) -> Tuple[List[float], List[float]]:
+def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     """
     Create 2 lists of coordinates according to the zoom, the coordinates and the color that appear in
     "tf_details" dataframe and save those in the temporary df sent, then returns the lists.
@@ -46,20 +46,14 @@ def create_bounding_rectangle(tf_details: pd.DataFrame, temp_cropped_df: pd.Data
             continue
             # plt.plot(tf_x, tf_y, 'ro', color=tf_color, markersize=3)
         if tf_color == C.RED:
-            x = tf_x + C.X_AXIS * (1 - zoom)
-            y = tf_y - C.Y_AXIS * (1 - zoom)
-            top_right = (x, y if y > 0 else 0)
-            x = tf_x - C.X_AXIS * (1 - zoom)
-            y = tf_y + (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
-            bottom_left = (x if x > 0 else 0, y)
+            x_top, y_top = tf_x + C.X_AXIS * (1 - zoom), tf_y - C.Y_AXIS * (1 - zoom)
+            x_bottom, y_bottom = tf_x - C.X_AXIS * (1 - zoom), tf_y + (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
         else:
-            x = tf_x + C.X_AXIS * (1 - zoom)
-            y = tf_y - (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
-            top_right = (x, y if y > 0 else 0)
-            x = tf_x - C.X_AXIS * (1 - zoom)
-            y = tf_y + C.Y_AXIS * (1 - zoom)
-            bottom_left = (x if x > 0 else 0, y)
+            x_top, y_top = tf_x + C.X_AXIS * (1 - zoom), tf_y - (C.HEIGHT - C.Y_AXIS) * (1 - zoom)
+            x_bottom, y_bottom = tf_x - C.X_AXIS * (1 - zoom), tf_y + C.Y_AXIS * (1 - zoom)
 
+        top_right = (x_top, y_top if y_top > 0 else 0)
+        bottom_left = (x_bottom if x_bottom > 0 else 0, y_bottom)
         rectangle_x = np.append(rectangle_x, [top_right[0], bottom_left[0]])
         rectangle_y = np.append(rectangle_y, [top_right[1], bottom_left[1]])
 
@@ -135,14 +129,15 @@ def connected_component(label_image, num_orange_pix, colored_point):
     comp_image = np.array(Image.open(label_image).convert('L'))
 
     all_labels = measure.label(comp_image)
-    blobs_labels = measure.label(comp_image, background=0)
+    # blobs_labels = measure.label(comp_image, background=0)
 
     comp_id = all_labels[int(colored_point[1])][int(colored_point[0])]
     total_orange_pix = np.count_nonzero(all_labels == comp_id)
 
-    if (num_orange_pix/total_orange_pix)*100 >= 60:
+    if (num_orange_pix/total_orange_pix)*100 >= C.TRUE_THRESHOLD:
         return True
-    elif ((num_orange_pix/total_orange_pix)*100 >= 40) and ((num_orange_pix/total_orange_pix)*100 < 60):
+    elif ((num_orange_pix/total_orange_pix)*100 >= C.FALSE_THRESHOLD) \
+            and ((num_orange_pix/total_orange_pix)*100 < C.TRUE_THRESHOLD):
         return C.IS_IGNORE
     else:
         return False
@@ -159,10 +154,10 @@ def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, 
     :return: True/False or the string: "is_ignore".
     """
     percentage = 100 * float(num_orange_pix)/float(total_pix)
-    if percentage < 40:
+    if percentage < C.FALSE_THRESHOLD:
         return False
-    elif percentage >= 60:
-        if percentage >= 95:
+    elif percentage >= C.TRUE_THRESHOLD:
+        if percentage >= C.HIGHER_THRESHOLD:
             return connected_component(label_image, num_orange_pix, colored_point)
         return True
     return C.IS_IGNORE
@@ -305,6 +300,11 @@ def create_pandas_cropped_images():
 
 
 def conversions(cropped_df):
+    """
+    Assuring convertions type 'object' to specific types for higher performance.
+    :param cropped_df: A dataframe of the crops images.
+    :return: A dataframe of the crops images with specific types.
+    """
     false, true = "False", "True"
 
     for i, row in cropped_df.iterrows():
@@ -333,7 +333,13 @@ def conversions(cropped_df):
     return cropped_df
 
 
-def export_to_hdf_file(path_to_dir, cropped_df, attention_df):
+def export_to_hdf_file(path_to_dir: str, cropped_df: pd.DataFrame, attention_df: pd.DataFrame) -> None:
+    """
+    Export pandas dataframe to .h5 file
+    :param path_to_dir: Path to directory where to save.
+    :param cropped_df: A dataframe of the crops images.
+    :param attention_df: A dataframe with the zoom.
+    """
     if not os.path.exists(path_to_dir):
         os.mkdir(path_to_dir)
 
@@ -343,15 +349,17 @@ def export_to_hdf_file(path_to_dir, cropped_df, attention_df):
     attention_df.to_hdf(path_to_dir + '/' + C.attention_results_h5, key='df', mode='w')
 
 
-def main():
-    cropped_df = create_pandas_cropped_images()
-    # print(cropped_df)
-    attention_df = data.create_data_frame(C.attention_results_h5)
-    attention_df = attention_df.dropna()
-    # print(attention_df)
-
-    path_to_h5_dir = C.BASE_DIR + '/' + C.attention_results
-    export_to_hdf_file(path_to_h5_dir, cropped_df, attention_df)
+def main() -> None:
+    """
+    Crop the images of the TFL and classifies them with True, False, Ignore then export dataframes to .h5
+    files. Then go to Neural Network train.
+    """
+    # cropped_df = create_pandas_cropped_images()
+    # attention_df = data.create_data_frame(C.attention_results_h5)
+    # attention_df = attention_df.dropna()
+    #
+    # path_to_h5_dir = C.BASE_DIR + '/' + C.attention_results
+    # export_to_hdf_file(path_to_h5_dir, cropped_df, attention_df)
 
     train.main()
 

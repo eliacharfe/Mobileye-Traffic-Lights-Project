@@ -139,8 +139,8 @@ class MyNeuralNetworkBase(nn.Module):
                                               C.max_pooling_kernel_shape[0], C.max_pooling_stride)
 
         shape_after_conv_height = cal_shape(shape_after_maxPool_height, C.padding, C.kernel_dimention,
-                                            C.conv_kernel_shape[0] -1, 1)
-        shape_after_conv_width = cal_shape(shape_after_maxPool_width, C.padding, C.kernel_dimention, C.conv_kernel_shape[0] -1,
+                                            C.conv_kernel_shape[0]+1, 1)
+        shape_after_conv_width = cal_shape(shape_after_maxPool_width, C.padding, C.kernel_dimention, C.conv_kernel_shape[0]+1,
                                            1)
 
         shape_after_maxPool_height = cal_shape(shape_after_conv_height, C.padding, C.kernel_dimention,
