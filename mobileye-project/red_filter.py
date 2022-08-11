@@ -4,11 +4,10 @@ import numpy as np
 from scipy import ndimage as ndi
 from PIL import Image
 
-image = np.array(Image.open(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000540_000019_leftImg8bit.png"))
-
+image = np.array(Image.open("image_path"))
 
 # read the image
-img = cv2.imread(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000540_000019_leftImg8bit.png")
+img = cv2.imread("image_path")
 
 # convert the BGR image to HSV colour space
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -42,5 +41,3 @@ plt.figure()
 plt.clf()
 plt.subplot(111, sharex=h, sharey=h)
 plt.imshow(image_max, cmap='gray')
-
-x=0
