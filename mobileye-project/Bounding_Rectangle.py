@@ -22,6 +22,7 @@ try:
     import skimage.transform as st
     import math
     import consts as C
+    import train_demo as train
 except ImportError:
     print("Need to fix the installation")
     raise
@@ -167,8 +168,8 @@ def calculate_percentage(num_orange_pix: int, total_pix: int, label_image: str, 
     return C.IS_IGNORE
 
 
-def get_top_rights_bottom_lefts(coordinates_x: List[float],
-                                coordinates_y: List[float]) -> [List[float], List[float]]:
+def get_top_rights_bottom_lefts(coordinates_x: np.ndarray,
+                                coordinates_y: np.ndarray) -> [List[float], List[float]]:
     """
     Get a list of all x coordinates and a list of all y coordinates representing top right point and
     bottom left point respectively, and return 2 list which 1 contains all top right points and the
@@ -188,7 +189,7 @@ def get_top_rights_bottom_lefts(coordinates_x: List[float],
     return top_right_arr, bottom_left_arr
 
 
-def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y: List[float],
+def label_calculate(paths_image: Tuple[str, str], coordinates_x: np.ndarray, coordinates_y: np.ndarray,
                     temp_cropped_df: pd.DataFrame, image_tf_details) -> None:
     """
     Get a tuple of the path to the image and the path to its label image, a list of all x coordinates,
@@ -199,6 +200,7 @@ def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y:
     :param coordinates_x: List of all x coordinates.
     :param coordinates_y: List of all y coordinates.
     :param temp_cropped_df: Temporary dataframe.
+    :param  image_tf_details: Dataframe.
     """
     label_im = np.array(Image.open(paths_image[1]).convert('RGB'))
     top_right_arr, bottom_left_arr = get_top_rights_bottom_lefts(coordinates_x, coordinates_y)
@@ -215,9 +217,9 @@ def label_calculate(paths_image: str, coordinates_x: List[float], coordinates_y:
 
         res = calculate_percentage(count_orange_pixels, sum_pixel_crop, paths_image[1],
                                    (image_tf_details['x'][i], image_tf_details['y'][i]))
-        if res == C.IS_IGNORE_SMALL:
-
-        elif res == C.IS_IGNORE:
+        # if res == C.IS_IGNORE_SMALL:
+        #     pass
+        if res == C.IS_IGNORE:
             temp_cropped_df.iat[i, C.INDEX_IGNORE] = True
         elif res:
             temp_cropped_df.iat[i, C.INDEX_TRUE] = True
@@ -291,7 +293,7 @@ def create_pandas_cropped_images():
 
         # image_axis_and_color = df.loc[df['path'] == image_name][['x', 'y', 'col']]
         # tf_coordinates_x, tf_coordinates_y = new_bounding_rectangle(im, image_axis_and_color, temp_cropped_df)
-        # label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df)
+        # label_calculate(path_dict[image_name], tf_coordinates_x, tf_coordinates_y, temp_cropped_df, image_axis_and_color)
 
         crop_tf_from_image(image_name, im, temp_cropped_df)
         cropped_df = pd.concat([cropped_df, temp_cropped_df], ignore_index=True)
@@ -302,15 +304,7 @@ def create_pandas_cropped_images():
     return cropped_df
 
 
-def main():
-    cropped_df = create_pandas_cropped_images()
-    attention_df = data.create_data_frame(C.attention_results_h5)
-    attention_df = attention_df.dropna()
-    path_to_h5 = C.BASE_DIR + '/' + C.attention_results
-
-    if not os.path.exists(path_to_h5):
-        os.mkdir(path_to_h5)
-
+def conversions(cropped_df):
     false, true = "False", "True"
 
     for i, row in cropped_df.iterrows():
@@ -336,9 +330,30 @@ def main():
     cropped_df[C.Y1] = cropped_df[C.Y1].astype('float64')
 
     print(cropped_df.dtypes)
+    return cropped_df
 
-    cropped_df.to_hdf(path_to_h5 + '/' + C.crop_results_h5, key='df', mode='w')
-    attention_df.to_hdf(path_to_h5 + '/' + C.attention_results_h5, key='df', mode='w')
+
+def export_to_hdf_file(path_to_dir, cropped_df, attention_df):
+    if not os.path.exists(path_to_dir):
+        os.mkdir(path_to_dir)
+
+    cropped_df = conversions(cropped_df)
+
+    cropped_df.to_hdf(path_to_dir + '/' + C.crop_results_h5, key='df', mode='w')
+    attention_df.to_hdf(path_to_dir + '/' + C.attention_results_h5, key='df', mode='w')
+
+
+def main():
+    cropped_df = create_pandas_cropped_images()
+    # print(cropped_df)
+    attention_df = data.create_data_frame(C.attention_results_h5)
+    attention_df = attention_df.dropna()
+    # print(attention_df)
+
+    path_to_h5_dir = C.BASE_DIR + '/' + C.attention_results
+    export_to_hdf_file(path_to_h5_dir, cropped_df, attention_df)
+
+    train.main()
 
 
 if __name__ == '__main__':

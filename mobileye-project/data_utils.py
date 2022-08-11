@@ -20,8 +20,10 @@ pd.set_option('display.width', 200, 'display.max_rows', 200,
 device = "cpu"
 print(f"Using {device} device")
 
+
 def cal_shape(axis, padding, dimension, kernel_size, stride):
     return int((axis + 2*padding - dimension*(kernel_size - 1) - 1)/stride + 1)
+
 
 class TrafficLightDataSet(Dataset):
     SEQ = 'seq'
@@ -149,11 +151,13 @@ class MyNeuralNetworkBase(nn.Module):
         self.layers = (nn.Conv2d(self.num_in_channels, C.num_of_layers, C.conv_kernel_shape),
                        nn.ReLU(),
                        nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
+
                        nn.Conv2d(C.second_num_of_channels, C.num_of_layers, C.conv_kernel_shape),
                        nn.ReLU(),
                        nn.ReLU(),
                        nn.MaxPool2d(C.max_pooling_kernel_shape, C.max_pooling_stride),
                        nn.ReLU(),
+
                        nn.Flatten(1, -1),
                        nn.Linear(int(C.num_of_layers * shape_after_maxPool_width*shape_after_maxPool_height), 1),
                        )
