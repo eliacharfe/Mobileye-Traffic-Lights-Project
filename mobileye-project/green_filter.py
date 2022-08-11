@@ -4,23 +4,22 @@ import numpy as np
 from scipy import ndimage as ndi
 from PIL import Image
 
-image = np.array(Image.open(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000455_000019_leftImg8bit.png"))
+image = np.array(Image.open(r"C:\leftImg8bit\test\berlin\berlin_000000_000019_leftImg8bit.png"))
 
 
-# read the image
-img = cv2.imread(r"C:\Users\leele\Desktop\Bootcamp\MobileyeProject\mobileye-project-mobileye-group-5\mobileye-project\test\berlin_000455_000019_leftImg8bit.png")
+img = cv2.imread(r"C:\leftImg8bit\test\berlin\berlin_000000_000019_leftImg8bit.png")
 
-# convert the BGR image to HSV colour space
+# convert to hsv
 hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
-# lower mask (0-10)
-lower_green = np.array([112, 167, 128])
-upper_green = np.array([180, 252, 190])
-mask = cv2.inRange(hsv, lower_green, upper_green)
+# mask of green (36,25,25) ~ (86, 255,255)
+# mask = cv2.inRange(hsv, (36, 25, 25), (86, 255,255))
+mask = cv2.inRange(hsv, (36, 25, 25), (70, 255,255))
 
-# perform bitwise and on the original image arrays using the mask
-res = cv2.bitwise_and(img, img, mask=mask)
-image_max = ndi.maximum_filter(res, size=20, mode='constant')
+# slice the green
+imask = mask>0
+green = np.zeros_like(img, np.uint8)
+green[imask] = img[imask]
 
 plt.figure()
 plt.clf()
@@ -33,6 +32,5 @@ plt.imshow(mask, cmap='gray')
 plt.figure()
 plt.clf()
 plt.subplot(111, sharex=h, sharey=h)
-plt.imshow(image_max, cmap='gray')
-
-x=0
+plt.imshow(green, cmap='gray')
+plt.show()

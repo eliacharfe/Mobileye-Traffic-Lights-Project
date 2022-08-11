@@ -6,13 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="43ef047f-05cc-4eb1-8fc4-41b5fc91a818" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/.idea/mobileye-project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/.idea/mobileye-project.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/Bounding_Rectangle.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/Bounding_Rectangle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/consts.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/consts.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/data_utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/data_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/mpl_goodies.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/mpl_goodies.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobileye-project/train_demo.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/train_demo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobileye-project/green_filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/green_filter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mobileye-project/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/mobileye-project/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +33,7 @@
     &quot;last_opened_file_path&quot;: &quot;C:/Users/leele/Desktop/Bootcamp&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.train_demo">
+  <component name="RunManager" selected="Python.green_filter">
     <configuration name="Bounding_Rectangle" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="mobileye-project-mobileye-group-5" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -52,6 +47,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mobileye-project/Bounding_Rectangle.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="green_filter" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="mobileye-project-mobileye-group-5" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/mobileye-project" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mobileye-project/green_filter.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -82,11 +98,13 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.green_filter" />
       <item itemvalue="Python.train_demo" />
       <item itemvalue="Python.Bounding_Rectangle" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.green_filter" />
         <item itemvalue="Python.train_demo" />
         <item itemvalue="Python.Bounding_Rectangle" />
       </list>
@@ -102,5 +120,16 @@
       <updated>1659874360945</updated>
     </task>
     <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/mobileye-project/green_filter.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
