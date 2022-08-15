@@ -1,5 +1,5 @@
-# mobileye-project-mobileye-group-5
-mobileye-project-mobileye-group-5 created by GitHub Classroom
+# Traffic Light Detection
+## Mobileye Project
 
 <h2>TFL Detection and Distance Estimation Detecting traffic lights within a given clip, estimating</br>
 their distance from the vehicle using image processing technologies, Neural networks and SFM (Structure From Motion)</br>
